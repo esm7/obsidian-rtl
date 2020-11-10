@@ -29,7 +29,7 @@ When enabled (which is the default), when you change the text direction of a fil
 Every time you open that file it will use the same text direction regardless of the default.
 This is useful, for example, if most of your notes are in English (so you want to keep the default LTR) but you have some notes in Arabic/Hebrew/Farsi and you'd like to always edit them in RTL.
 
-If you disable this setting, all notes will load in the default text direction
+If you disable this setting, all notes will load in the default text direction.
 
 If you want to forget the text direction of a file and go back to using the default, remove it from the map in `VAULT_DIR/.obsidian/rtl.json`.
 
