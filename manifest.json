@@ -1,0 +1,9 @@
+{
+  "id": "obsidian-rtl",
+  "name": "RTL Support",
+  "version": "0.0.1",
+  "description": "Right to Left (RTL) text direction support for languages like Arabic, Hebrew and Farsi.",
+  "author": "esm",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}
