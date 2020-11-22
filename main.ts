@@ -107,7 +107,8 @@ export default class RtlPlugin extends Plugin {
 	setDocumentDirection(newDirection: string) {
 		var cmEditor = this.getEditor();
 		if (cmEditor && cmEditor.getOption("direction") != newDirection) {
-			cmEditor.setOption("direction", newDirection)
+			cmEditor.setOption("direction", newDirection);
+			cmEditor.setOption("rtlMoveVisually", true);
 		}
 	}
 
