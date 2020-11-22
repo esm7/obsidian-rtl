@@ -29,12 +29,12 @@ When enabled (which is the default), when you change the text direction of a fil
 Every time you open that file it will use the same text direction regardless of the default.
 This is useful, for example, if most of your notes are in English (so you want to keep the default LTR) but you have some notes in Arabic/Hebrew/Farsi and you'd like to always edit them in RTL.
 
-If you disable this setting, all notes will load in the default text direction
+If you disable this setting, all notes will load in the default text direction.
 
 If you want to forget the text direction of a file and go back to using the default, remove it from the map in `VAULT_DIR/.obsidian/rtl.json`.
 
 ## Known Issues
 
 - Minor visual glitches in RTL mode, e.g. alignment of bullets is not exactly as you'd expect. I believe some CSS wizardry can fix this.
-- This plugin only treats the Markdown editor. I personally don't use the Markdown preview/rendering so I didn't work on that one.
+- This plugin only treats the Markdown editor. I personally don't use the Markdown preview/rendering so I didn't work on that one. Let me know if you find that important, or open a PR to make it work if you can :)
 - The plugin outputs some debug info to the console, I'll remove these when I gain more confidence everything works as expected.
