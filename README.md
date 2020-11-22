@@ -38,3 +38,9 @@ If you want to forget the text direction of a file and go back to using the defa
 - Minor visual glitches in RTL mode, e.g. alignment of bullets is not exactly as you'd expect. I believe some CSS wizardry can fix this.
 - This plugin only treats the Markdown editor. I personally don't use the Markdown preview/rendering so I didn't work on that one. Let me know if you find that important, or open a PR to make it work if you can :)
 - The plugin outputs some debug info to the console, I'll remove these when I gain more confidence everything works as expected.
+
+## Changelog
+
+### 0.0.2
+
+- Fixed cursor movement on Windows: https://github.com/esm7/obsidian-rtl/issues/3
