@@ -110,6 +110,9 @@ export default class RtlPlugin extends Plugin {
 			cmEditor.setOption("direction", newDirection);
 			cmEditor.setOption("rtlMoveVisually", true);
 		}
+		var view = this.app.workspace.activeLeaf.view;
+		if (view && view.previewMode && view.previewMode.containerEl)
+			view.previewMode.containerEl.dir = newDirection;
 	}
 
 	toggleDocumentDirection() {

@@ -41,6 +41,10 @@ If you want to forget the text direction of a file and go back to using the defa
 
 ## Changelog
 
+### 0.0.3
+
+- RTL support in preview mode.
+
 ### 0.0.2
 
 - Fixed cursor movement on Windows: https://github.com/esm7/obsidian-rtl/issues/3
