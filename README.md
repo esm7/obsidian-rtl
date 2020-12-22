@@ -36,7 +36,9 @@ If you want to forget the text direction of a file and go back to using the defa
 ## Known Issues
 
 - Minor visual glitches in RTL mode, e.g. alignment of bullets is not exactly as you'd expect. I believe some CSS wizardry can fix this.
-- This plugin only treats the Markdown editor. I personally don't use the Markdown preview/rendering so I didn't work on that one. Let me know if you find that important, or open a PR to make it work if you can :)
+- This plugin only treats the Markdown editor and preview. There are some areas of the app, like the Outline view, that are not covered for now.
+- Auto-pair brackets is disabled in RTL ([CodeMirror bug with a pending fix](https://github.com/esm7/obsidian-rtl/issues/7)).
+- When an RTL line ends with an LTR word, the End key misbehaves. [CodeMirror bug](https://github.com/codemirror/CodeMirror/issues/6531).
 - The plugin outputs some debug info to the console, I'll remove these when I gain more confidence everything works as expected.
 
 ## Changelog
