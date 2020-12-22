@@ -1,6 +1,6 @@
 {
   "name": "obsidian-rtl",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "RTL (Right to Left) language support for Obsidian.",
   "main": "main.js",
   "scripts": {

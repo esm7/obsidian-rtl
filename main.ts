@@ -22,6 +22,9 @@ export default class RtlPlugin extends Plugin {
 	public settings = new Settings();
 	private currentFile: TFile;
 	public SETTINGS_PATH = '.obsidian/rtl.json'
+	// This stores the value in CodeMirror's autoCloseBrackets option before overriding it, so it can be restored when
+	// we're back to LTR
+	private autoCloseBracketsValue: any = false;
 
 	onload() {
 		console.log('loading RTL plugin');
@@ -61,6 +64,23 @@ export default class RtlPlugin extends Plugin {
 				console.log("Updated the map");
 			}
 		}));
+
+		this.registerDomEvent(document, 'keydown', (ev: KeyboardEvent) => {
+			// Patch Home/End issue on RTL: https://github.com/esm7/obsidian-rtl/issues/6
+			if (ev.key == 'End' || ev.key == 'Home') {
+				let cmEditor = this.getEditor();
+				if (cmEditor.getOption("direction") == 'rtl') {
+					// In theory we can execute the following regardless of the editor direction, it should always work,
+					// but it's redundant and the principle in this plugin is to not interfere with Obsidian when the 
+					// direction is LTR
+					if (ev.key == 'End') {
+						cmEditor.execCommand('goLineEnd');
+					} else if (ev.key == 'Home') {
+						cmEditor.execCommand('goLineStartSmart');
+					}
+				}
+			}
+		});
 	}
 
 	onunload() {
@@ -107,12 +127,25 @@ export default class RtlPlugin extends Plugin {
 	setDocumentDirection(newDirection: string) {
 		var cmEditor = this.getEditor();
 		if (cmEditor && cmEditor.getOption("direction") != newDirection) {
+			this.patchAutoCloseBrackets(cmEditor, newDirection);
 			cmEditor.setOption("direction", newDirection);
 			cmEditor.setOption("rtlMoveVisually", true);
 		}
 		var view = this.app.workspace.activeLeaf.view;
 		if (view && view.previewMode && view.previewMode.containerEl)
 			view.previewMode.containerEl.dir = newDirection;
+	}
+
+	patchAutoCloseBrackets(cmEditor, newDirection: string) {
+		// Auto-close brackets doesn't work in RTL: https://github.com/esm7/obsidian-rtl/issues/7
+		// Until the actual fix is released (as part of CodeMirror), we store the value of autoCloseBrackets when
+		// switching to RTL, overriding it to 'false' and restoring it when back to LTR.
+		if (newDirection == 'rtl') {
+			this.autoCloseBracketsValue = cmEditor.getOption('autoCloseBrackets');
+			cmEditor.setOption('autoCloseBrackets', false);
+		} else {
+			cmEditor.setOption('autoCloseBrackets', this.autoCloseBracketsValue);
+		}
 	}
 
 	toggleDocumentDirection() {

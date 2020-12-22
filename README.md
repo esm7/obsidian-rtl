@@ -41,6 +41,11 @@ If you want to forget the text direction of a file and go back to using the defa
 
 ## Changelog
 
+### 0.0.4
+
+- Auto-pair brackets patch (https://github.com/esm7/obsidian-rtl/issues/7): until CodeMirror release their fix and Obsidian adapts it, the plugin temporarily disables auto-pair brackets when in RTL mode.
+- Patching around Obsidian misbehaving on Home/End keys in RTL mode (https://github.com/esm7/obsidian-rtl/issues/6).
+
 ### 0.0.3
 
 - RTL support in preview mode.
