@@ -134,6 +134,16 @@ export default class RtlPlugin extends Plugin {
 		var view = this.app.workspace.activeLeaf.view;
 		if (view && view.previewMode && view.previewMode.containerEl)
 			view.previewMode.containerEl.dir = newDirection;
+		this.setExportDirection(newDirection);
+	}
+
+	setExportDirection(newDirection: string) {
+		let styles = document.head.getElementsByTagName('style');
+		for (let style of styles) {
+			if (style.getText().includes('@media print')) {
+				style.setText(`@media print { body { direction: ${newDirection}; } }`)
+			}
+		}
 	}
 
 	patchAutoCloseBrackets(cmEditor, newDirection: string) {

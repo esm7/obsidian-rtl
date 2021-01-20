@@ -1,0 +1,6 @@
+@media print {
+	/* This is searched and replaced by the plugin according to the document direction */
+	body {
+		direction: ltr;
+	}
+}
