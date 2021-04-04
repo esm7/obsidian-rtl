@@ -3,4 +3,8 @@
 	body {
 		direction: ltr;
 	}
+
+	.CodeMirror-code, .CodeMirror-linenumber, .cm-formatting {
+        font-family: var(--font-monospace) !important;
+	} 
 }
