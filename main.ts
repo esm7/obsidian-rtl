@@ -47,21 +47,17 @@ export default class RtlPlugin extends Plugin {
 		}));
 
 		this.registerEvent(this.app.vault.on('delete', (file: TAbstractFile) => {
-			console.log("Detected deletion of", file);
 			if (file && file.path && file.path in this.settings.fileDirections) {
 				delete this.settings.fileDirections[file.path];
 				this.saveSettings();
-				console.log("Deleted the file from the map");
 			}
 		}));
 
 		this.registerEvent(this.app.vault.on('rename', (file: TAbstractFile, oldPath: string) => {
-			console.log("Detected rename:", oldPath, "=>", file);
 			if (file && file.path && oldPath in this.settings.fileDirections) {
 				this.settings.fileDirections[file.path] = this.settings.fileDirections[oldPath];
 				delete this.settings.fileDirections[oldPath];
 				this.saveSettings();
-				console.log("Updated the map");
 			}
 		}));
 
@@ -92,11 +88,9 @@ export default class RtlPlugin extends Plugin {
 			if (this.settings.rememberPerFile && this.currentFile.path in this.settings.fileDirections) {
 				// If the user wants to remember the direction per file, and we have a direction set for this file -- use it
 				var requiredDirection = this.settings.fileDirections[this.currentFile.path];
-				console.log('Found a known direction for this file:', requiredDirection)
 			} else {
 				// Use the default direction
 				var requiredDirection = this.settings.defaultDirection;
-				console.log('No known direction for this file, using the default', this.settings.defaultDirection);
 			}
 			this.setDocumentDirection(requiredDirection);
 		}
@@ -108,7 +102,6 @@ export default class RtlPlugin extends Plugin {
 	}
 
 	loadSettings() {
-		console.log("Loading RTL settings");
 		this.app.vault.adapter.read(this.SETTINGS_PATH).
 			then((content) => this.settings.fromJson(content)).
 			catch(error => { console.log("RTL settings file not found"); });
@@ -134,6 +127,18 @@ export default class RtlPlugin extends Plugin {
 		var view = this.app.workspace.activeLeaf.view;
 		if (view && view.previewMode && view.previewMode.containerEl)
 			view.previewMode.containerEl.dir = newDirection;
+
+		// Fix the list indentation style
+		let listStyle = document.createElement('style');
+		document.head.appendChild(listStyle);
+		listStyle.sheet.insertRule(".CodeMirror-rtl pre { text-indent: 0px !important; }");
+
+		var leafContainer = (this.app.workspace.activeLeaf as any).containerEl as Document;
+		let header = leafContainer.getElementsByClassName('view-header-title-container');
+		// let headerStyle = document.createElement('style');
+		// header[0].appendChild(headerStyle);
+		(header[0] as any).style.direction = newDirection;
+
 		this.setExportDirection(newDirection);
 	}
 
@@ -146,7 +151,7 @@ export default class RtlPlugin extends Plugin {
 		}
 	}
 
-	patchAutoCloseBrackets(cmEditor, newDirection: string) {
+	patchAutoCloseBrackets(cmEditor: any, newDirection: string) {
 		// Auto-close brackets doesn't work in RTL: https://github.com/esm7/obsidian-rtl/issues/7
 		// Until the actual fix is released (as part of CodeMirror), we store the value of autoCloseBrackets when
 		// switching to RTL, overriding it to 'false' and restoring it when back to LTR.
@@ -163,7 +168,6 @@ export default class RtlPlugin extends Plugin {
 		if (cmEditor) {
 			var newDirection = cmEditor.getOption("direction") == "ltr" ? "rtl" : "ltr"
 			this.setDocumentDirection(newDirection);
-			console.log('File', this.currentFile, 'was set to', newDirection);
 			if (this.settings.rememberPerFile && this.currentFile && this.currentFile.path) {
 				this.settings.fileDirections[this.currentFile.path] = newDirection;
 				this.saveSettings();
