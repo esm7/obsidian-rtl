@@ -3,4 +3,9 @@
 	body {
 		direction: ltr;
 	}
+	
+	span.cm-tab {
+		width: 50px !important;
+		display: inline-block;
+	}
 }
