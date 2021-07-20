@@ -1,9 +1,11 @@
-import { App, Modal, MarkdownView, Plugin, PluginSettingTab, TFile, TAbstractFile, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Plugin, PluginSettingTab, TFile, TAbstractFile, Setting } from 'obsidian';
+import * as codemirror from 'codemirror';
 
 class Settings {
 	public fileDirections: { [path: string]: string } = {};
 	public defaultDirection: string = 'ltr';
 	public rememberPerFile: boolean = true;
+	public setNoteTitleDirection: boolean = true;
 
 	toJson() {
 		return JSON.stringify(this);
@@ -14,6 +16,7 @@ class Settings {
 		this.fileDirections = obj['fileDirections'];
 		this.defaultDirection = obj['defaultDirection'];
 		this.rememberPerFile = obj['rememberPerFile'];
+		this.setNoteTitleDirection = obj['setNoteTitleDirection'];
 	}
 }
 
@@ -61,22 +64,34 @@ export default class RtlPlugin extends Plugin {
 			}
 		}));
 
-		this.registerDomEvent(document, 'keydown', (ev: KeyboardEvent) => {
-			// Patch Home/End issue on RTL: https://github.com/esm7/obsidian-rtl/issues/6
-			if (ev.key == 'End' || ev.key == 'Home') {
-				let cmEditor = this.getEditor();
-				if (cmEditor.getOption("direction") == 'rtl') {
-					// In theory we can execute the following regardless of the editor direction, it should always work,
-					// but it's redundant and the principle in this plugin is to not interfere with Obsidian when the 
-					// direction is LTR
-					if (ev.key == 'End') {
-						cmEditor.execCommand('goLineEnd');
-					} else if (ev.key == 'Home') {
-						cmEditor.execCommand('goLineStartSmart');
+		this.registerCodeMirror((cm: CodeMirror.Editor) => {
+			let cmEditor = cm;
+			cmEditor.setOption('extraKeys', {
+				'End': (cm) => {
+					if (cm.getOption('direction') == 'rtl') {
+						let editor = this.getObsidianEditor();
+						let pos = editor.getCursor();
+						pos.ch = 1000;
+						editor.setCursor(pos);
+						editor.refresh();
 					}
+					else
+						cm.execCommand('goLineEnd');
+				},
+				'Home': (cm) => {
+					if (cm.getOption('direction') == 'rtl') {
+						let editor = this.getObsidianEditor();
+						let pos = editor.getCursor();
+						pos.ch = 0;
+						editor.setCursor(pos);
+						editor.refresh();
+					}
+					else
+						cm.execCommand('goLineStartSmart');
 				}
-			}
+			});
 		});
+
 	}
 
 	onunload() {
@@ -107,24 +122,28 @@ export default class RtlPlugin extends Plugin {
 			catch(error => { console.log("RTL settings file not found"); });
 	}
 
-	getEditor() {
-		var view = this.app.workspace.activeLeaf.view;
-		if (view.getViewType() == 'markdown') {
-			var markdownView = view as MarkdownView;
-			var cmEditor = markdownView.sourceMode.cmEditor;
-			return cmEditor;
-		}
+	getObsidianEditor(): Editor {
+		let view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (view)
+			return view.editor;
+		return null;
+	}
+
+	getCmEditor(): codemirror.Editor {
+		let view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (view)
+			return view.sourceMode?.cmEditor;
 		return null;
 	}
 
 	setDocumentDirection(newDirection: string) {
-		var cmEditor = this.getEditor();
+		var cmEditor = this.getCmEditor();
 		if (cmEditor && cmEditor.getOption("direction") != newDirection) {
 			this.patchAutoCloseBrackets(cmEditor, newDirection);
-			cmEditor.setOption("direction", newDirection);
+			cmEditor.setOption("direction", newDirection as any);
 			cmEditor.setOption("rtlMoveVisually", true);
 		}
-		var view = this.app.workspace.activeLeaf.view;
+		let view = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (view && view.previewMode && view.previewMode.containerEl)
 			view.previewMode.containerEl.dir = newDirection;
 
@@ -133,11 +152,13 @@ export default class RtlPlugin extends Plugin {
 		document.head.appendChild(listStyle);
 		listStyle.sheet.insertRule(".CodeMirror-rtl pre { text-indent: 0px !important; }");
 
-		var leafContainer = (this.app.workspace.activeLeaf as any).containerEl as Document;
-		let header = leafContainer.getElementsByClassName('view-header-title-container');
-		// let headerStyle = document.createElement('style');
-		// header[0].appendChild(headerStyle);
-		(header[0] as any).style.direction = newDirection;
+		if (this.settings.setNoteTitleDirection) {
+			var leafContainer = (this.app.workspace.activeLeaf as any).containerEl as Document;
+			let header = leafContainer.getElementsByClassName('view-header-title-container');
+			// let headerStyle = document.createElement('style');
+			// header[0].appendChild(headerStyle);
+			(header[0] as any).style.direction = newDirection;
+		}
 
 		this.setExportDirection(newDirection);
 	}
@@ -164,7 +185,7 @@ export default class RtlPlugin extends Plugin {
 	}
 
 	toggleDocumentDirection() {
-		var cmEditor = this.getEditor();
+		var cmEditor = this.getCmEditor();
 		if (cmEditor) {
 			var newDirection = cmEditor.getOption("direction") == "ltr" ? "rtl" : "ltr"
 			this.setDocumentDirection(newDirection);
@@ -214,5 +235,16 @@ class RtlSettingsTab extends PluginSettingTab {
 							 this.plugin.saveSettings();
 							 this.plugin.adjustDirectionToCurrentFile();
 						 }));
+
+		new Setting(containerEl)
+			.setName('Set note title direction')
+			.setDesc('In RTL notes, also set the direction of the note title.')
+			.addToggle(toggle => toggle.setValue(this.settings.setNoteTitleDirection)
+						 .onChange((value) => {
+							 this.settings.setNoteTitleDirection = value;
+							 this.plugin.saveSettings();
+							 this.plugin.adjustDirectionToCurrentFile();
+						 }));
+
 	}
 }

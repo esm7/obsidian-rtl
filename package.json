@@ -1,6 +1,6 @@
 {
   "name": "obsidian-rtl",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "RTL (Right to Left) language support for Obsidian.",
   "main": "main.js",
   "scripts": {
@@ -15,6 +15,7 @@
     "@rollup/plugin-node-resolve": "^9.0.0",
     "@rollup/plugin-typescript": "^6.1.0",
     "@types/node": "^14.14.2",
+    "codemirror": "^5.62.0",
     "obsidian": "https://github.com/obsidianmd/obsidian-api/tarball/master",
     "rollup": "^2.33.0",
     "tslib": "^2.0.3",

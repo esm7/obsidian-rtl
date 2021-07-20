@@ -38,8 +38,15 @@ If you want to forget the text direction of a file and go back to using the defa
 - This plugin only treats the Markdown editor, preview and export. There are some areas of the app, like the Outline view, that are not covered for now.
 - Auto-pair brackets is disabled in RTL ([CodeMirror bug with a pending fix](https://github.com/esm7/obsidian-rtl/issues/7)).
 - When an RTL line ends with an LTR word, the End key misbehaves. [CodeMirror bug](https://github.com/codemirror/CodeMirror/issues/6531).
+- There are various glitches in handling some keyboard shortcuts in RTL, e.g. Ctrl+Home/Ctrl+End are not properly handled yet, Ctrl+Left lands on the wrong character and some others. These are very hard to overcome due to the patchy RTL support of the current CodeMirror versions, and occasionally I'm able to improve things a bit.
 
 ## Changelog
+
+### 0.0.7
+
+- Improved the handling of the Home & End keys (without Shift at this point) in RTL. It's still not perfect (CodeMirror is not good at this) but at least the basic functionality works.
+- Some adaptations to the newest Obsidian API.
+- Setting the direction of the note title (https://github.com/esm7/obsidian-rtl/issues/15) is now configurable.
 
 ### 0.0.6
 
