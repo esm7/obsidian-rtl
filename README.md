@@ -42,6 +42,10 @@ If you want to forget the text direction of a file and go back to using the defa
 
 ## Changelog
 
+### 0.0.8
+
+- Fixed a bug in the previous release, of some important Obsidian editing behavior (e.g. auto-complete list bullets) being overwritten.
+
 ### 0.0.7
 
 - Improved the handling of the Home & End keys (without Shift at this point) in RTL. It's still not perfect (CodeMirror is not good at this) but at least the basic functionality works.

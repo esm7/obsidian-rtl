@@ -66,8 +66,9 @@ export default class RtlPlugin extends Plugin {
 
 		this.registerCodeMirror((cm: CodeMirror.Editor) => {
 			let cmEditor = cm;
-			cmEditor.setOption('extraKeys', {
-				'End': (cm) => {
+			let currentExtraKeys = cmEditor.getOption('extraKeys');
+			let moreKeys = {
+				'End': (cm: CodeMirror.Editor) => {
 					if (cm.getOption('direction') == 'rtl') {
 						let editor = this.getObsidianEditor();
 						let pos = editor.getCursor();
@@ -78,7 +79,7 @@ export default class RtlPlugin extends Plugin {
 					else
 						cm.execCommand('goLineEnd');
 				},
-				'Home': (cm) => {
+				'Home': (cm: CodeMirror.Editor) => {
 					if (cm.getOption('direction') == 'rtl') {
 						let editor = this.getObsidianEditor();
 						let pos = editor.getCursor();
@@ -89,7 +90,8 @@ export default class RtlPlugin extends Plugin {
 					else
 						cm.execCommand('goLineStartSmart');
 				}
-			});
+			};
+			cmEditor.setOption('extraKeys', Object.assign({}, currentExtraKeys, moreKeys));
 		});
 
 	}
