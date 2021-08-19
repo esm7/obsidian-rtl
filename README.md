@@ -42,6 +42,10 @@ If you want to forget the text direction of a file and go back to using the defa
 
 ## Changelog
 
+### 0.0.9
+
+- Fixed [incompatibility with the Excalidraw plugin](https://github.com/esm7/obsidian-rtl/issues/20) and improved the plugin's technical behavior overall (it now tries not to override non-Markdown views).
+
 ### 0.0.8
 
 - Fixed a bug in the previous release, of some important Obsidian editing behavior (e.g. auto-complete list bullets) being overwritten.

@@ -149,27 +149,30 @@ export default class RtlPlugin extends Plugin {
 		if (view && view.previewMode && view.previewMode.containerEl)
 			view.previewMode.containerEl.dir = newDirection;
 
-		// Fix the list indentation style
-		let listStyle = document.createElement('style');
-		document.head.appendChild(listStyle);
-		listStyle.sheet.insertRule(".CodeMirror-rtl pre { text-indent: 0px !important; }");
+		if (view) {
+			// Fix the list indentation style
+			let listStyle = document.createElement('style');
+			document.head.appendChild(listStyle);
+			listStyle.sheet.insertRule(".CodeMirror-rtl pre { text-indent: 0px !important; }");
 
-		if (this.settings.setNoteTitleDirection) {
-			var leafContainer = (this.app.workspace.activeLeaf as any).containerEl as Document;
-			let header = leafContainer.getElementsByClassName('view-header-title-container');
-			// let headerStyle = document.createElement('style');
-			// header[0].appendChild(headerStyle);
-			(header[0] as any).style.direction = newDirection;
+			if (this.settings.setNoteTitleDirection) {
+				var leafContainer = (this.app.workspace.activeLeaf as any).containerEl as Document;
+				let header = leafContainer.getElementsByClassName('view-header-title-container');
+				// let headerStyle = document.createElement('style');
+				// header[0].appendChild(headerStyle);
+				(header[0] as any).style.direction = newDirection;
+			}
+
+			this.setExportDirection(newDirection);
 		}
 
-		this.setExportDirection(newDirection);
 	}
 
 	setExportDirection(newDirection: string) {
 		let styles = document.head.getElementsByTagName('style');
 		for (let style of styles) {
-			if (style.getText().includes('@media print')) {
-				style.setText(`@media print { body { direction: ${newDirection}; } }`)
+			if (style.getText().includes('searched and replaced') && style.getText().includes('direction:')) {
+				style.setText(`/* This is searched and replaced by the plugin */ @media print { body { direction: ${newDirection}; } }`)
 			}
 		}
 	}
