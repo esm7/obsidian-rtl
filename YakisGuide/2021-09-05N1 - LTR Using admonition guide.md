@@ -27,7 +27,7 @@ The "RTL Support" plug-in changes the direction in the `<Body>` section, while t
 
 ![](static/Pasted%20image%2020210905153418.png)
 
-**Then click on "Add New" **
+**Then click on "Add New"**
 
 **In the next window insert the details of the new admonition:**
 * Admonition Type: the name of this admonition (later you'll use this name). 
@@ -47,13 +47,13 @@ add the code:
 	direction:ltr;
 }
 ```
-In my case it'll be: 
+**In my case it'll be:**
 
 ![](static/Pasted%20image%2020210905151924.png)
 **Then save and restart your Obsidian**
 
 ## Step 4: Use the customized Admonition
-In your none Insert a Code Block with the format:
+**In your none Insert a Code Block with the format:**
 ````
 ```ad-<Admonition Type>
 title: <your_title>
@@ -62,7 +62,7 @@ your content..
 ```
 ````
 
-In my case : 
+**In my case :**
 `````
 ````ad-code
 title: Example for using RESTful API to push .md file to OP's GIT
