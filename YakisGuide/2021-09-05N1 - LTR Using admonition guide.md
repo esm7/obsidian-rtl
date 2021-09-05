@@ -1,22 +1,12 @@
----
-tags: [notes, memo, personal, memory] 
-created: 2021-09-05 11:39
-modified: 2021-09-05 11:39
-type: Memo
-title:  
-link: [[2021-09-05N1 |   ]]
----
-Week Of: [[2021-09-05]]
-[[2021-09-05]]
+
 
 # Multi language-directions in the same note 
-[[HOME]]/[[Personal]]/[[Memos]]
 
 ## Abstract
 Almost every obsidian user who writes in RTL language(like Hebrew and Arabic) aware of this problem: you want to write the note in your Right To Left language using the outstanding plug-in called "RTL Support". Yet, when you want to change the page direction, it affected the entire note, even you've some parts in the document that you want them to display in LTR direction(like code, some English quote etc. ).
 The "RTL Support" plug-in changes the direction in the `<Body>` section, while this workaround will takes care of the option of changing the direction in the `<div>` level. 
 **Before**:
-> ![[Pasted image 20210905134340.png]]
+> (Pasted image 20210905134340.png)[]!
 
 **After**:
 > ![[Pasted image 20210905134104.png]]
