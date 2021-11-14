@@ -23,7 +23,7 @@ When enabled, you will have a "Switch Text Direction" command (accessible via Ct
 
 This is the direction to use for files on which you have not set an explicit text direction.
 
-### Remember text direction per file
+### Remember Text Direction Per File
 
 When enabled (which is the default), when you change the text direction of a file it will be saved.
 Every time you open that file it will use the same text direction regardless of the default.
@@ -33,6 +33,20 @@ If you disable this setting, all notes will load in the default text direction.
 
 If you want to forget the text direction of a file and go back to using the default, remove it from the map in `VAULT_DIR/.obsidian/rtl.json`.
 
+### Front Matter Direction
+
+It's also possible to specify the note direction using a [front matter](https://help.obsidian.md/Advanced+topics/YAML+front+matter):
+
+```
+---
+direction: rtl
+---
+```
+
+The front matter direction overrides any other setting.
+It is possible to temporarily override a note's direction regardless of the front matter (e.g. to edit or view it differently), but the next time the note is loaded, the front matter direction will always be used.
+
+
 ## Known Issues
 
 - This plugin only treats the Markdown editor, preview and export. There are some areas of the app, like the Outline view, that are not covered for now.
@@ -41,6 +55,12 @@ If you want to forget the text direction of a file and go back to using the defa
 - There are various glitches in handling some keyboard shortcuts in RTL, e.g. Ctrl+Home/Ctrl+End are not properly handled yet, Ctrl+Left lands on the wrong character and some others. These are very hard to overcome due to the patchy RTL support of the current CodeMirror versions, and occasionally I'm able to improve things a bit.
 
 ## Changelog
+
+### 0.1.0
+
+- Another take at the Home and End keys, trying to make them behave like they should in RTL.
+- Added support to setting a note direction via the front matter, as requested [here](https://github.com/esm7/obsidian-rtl/issues/24).
+- Added a configurable option to right-align YAML previews as requested [here](https://github.com/esm7/obsidian-rtl/issues/25).
 
 ### 0.0.9
 

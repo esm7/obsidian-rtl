@@ -6,6 +6,7 @@ class Settings {
 	public defaultDirection: string = 'ltr';
 	public rememberPerFile: boolean = true;
 	public setNoteTitleDirection: boolean = true;
+	public setYamlDirection: boolean = false;
 
 	toJson() {
 		return JSON.stringify(this);
@@ -69,26 +70,16 @@ export default class RtlPlugin extends Plugin {
 			let currentExtraKeys = cmEditor.getOption('extraKeys');
 			let moreKeys = {
 				'End': (cm: CodeMirror.Editor) => {
-					if (cm.getOption('direction') == 'rtl') {
-						let editor = this.getObsidianEditor();
-						let pos = editor.getCursor();
-						pos.ch = 1000;
-						editor.setCursor(pos);
-						editor.refresh();
-					}
+					if (cm.getOption('direction') == 'rtl')
+						cm.execCommand('goLineLeftSmart');
 					else
-						cm.execCommand('goLineEnd');
+						cm.execCommand('goLineRight');
 				},
 				'Home': (cm: CodeMirror.Editor) => {
-					if (cm.getOption('direction') == 'rtl') {
-						let editor = this.getObsidianEditor();
-						let pos = editor.getCursor();
-						pos.ch = 0;
-						editor.setCursor(pos);
-						editor.refresh();
-					}
+					if (cm.getOption('direction') == 'rtl')
+						cm.execCommand('goLineRight');
 					else
-						cm.execCommand('goLineStartSmart');
+						cm.execCommand('goLineLeftSmart');
 				}
 			};
 			cmEditor.setOption('extraKeys', Object.assign({}, currentExtraKeys, moreKeys));
@@ -102,12 +93,20 @@ export default class RtlPlugin extends Plugin {
 
 	adjustDirectionToCurrentFile() {
 		if (this.currentFile && this.currentFile.path) {
-			if (this.settings.rememberPerFile && this.currentFile.path in this.settings.fileDirections) {
+			let requiredDirection = null;
+			const frontMatterDirection = this.getFrontMatterDirection(this.currentFile);
+			if (frontMatterDirection) {
+				if (frontMatterDirection == 'rtl' || frontMatterDirection == 'ltr')
+					requiredDirection = frontMatterDirection;
+				else
+					console.log('Front matter direction in file', this.currentFile.path, 'is unknown:', frontMatterDirection);
+			}
+			else if (this.settings.rememberPerFile && this.currentFile.path in this.settings.fileDirections) {
 				// If the user wants to remember the direction per file, and we have a direction set for this file -- use it
-				var requiredDirection = this.settings.fileDirections[this.currentFile.path];
+				requiredDirection = this.settings.fileDirections[this.currentFile.path];
 			} else {
 				// Use the default direction
-				var requiredDirection = this.settings.defaultDirection;
+				requiredDirection = this.settings.defaultDirection;
 			}
 			this.setDocumentDirection(requiredDirection);
 		}
@@ -151,15 +150,19 @@ export default class RtlPlugin extends Plugin {
 
 		if (view) {
 			// Fix the list indentation style
-			let listStyle = document.createElement('style');
-			document.head.appendChild(listStyle);
-			listStyle.sheet.insertRule(".CodeMirror-rtl pre { text-indent: 0px !important; }");
+			this.replacePageStyleByString('CodeMirror-rtl pre',
+				`.CodeMirror-rtl pre { text-indent: 0px !important; }`,
+				true);
+
+			if (this.settings.setYamlDirection) {
+				const alignSide = newDirection == 'rtl' ? 'right' : 'left';
+				this.replacePageStyleByString('Patch YAML',
+					`/* Patch YAML RTL */ .language-yml code { text-align: ${alignSide}; }`, true);
+			}
 
 			if (this.settings.setNoteTitleDirection) {
 				var leafContainer = (this.app.workspace.activeLeaf as any).containerEl as Document;
 				let header = leafContainer.getElementsByClassName('view-header-title-container');
-				// let headerStyle = document.createElement('style');
-				// header[0].appendChild(headerStyle);
 				(header[0] as any).style.direction = newDirection;
 			}
 
@@ -169,11 +172,24 @@ export default class RtlPlugin extends Plugin {
 	}
 
 	setExportDirection(newDirection: string) {
+		this.replacePageStyleByString('searched and replaced',
+			`/* This is searched and replaced by the plugin */ @media print { body { direction: ${newDirection}; } }`,
+			false);
+	}
+
+	replacePageStyleByString(searchString: string, newStyle: string, addIfNotFound: boolean) {
 		let styles = document.head.getElementsByTagName('style');
+		let found = false;
 		for (let style of styles) {
-			if (style.getText().includes('searched and replaced') && style.getText().includes('direction:')) {
-				style.setText(`/* This is searched and replaced by the plugin */ @media print { body { direction: ${newDirection}; } }`)
+			if (style.getText().includes(searchString)) {
+				style.setText(newStyle);
+				found = true;
 			}
+		}
+		if (!found && addIfNotFound) {
+			let style = document.createElement('style');
+			style.textContent = newStyle;
+			document.head.appendChild(style);
 		}
 	}
 
@@ -198,6 +214,18 @@ export default class RtlPlugin extends Plugin {
 				this.settings.fileDirections[this.currentFile.path] = newDirection;
 				this.saveSettings();
 			}
+		}
+	}
+
+	getFrontMatterDirection(file: TFile) {
+		const fileCache = this.app.metadataCache.getFileCache(file);
+		const frontMatter = fileCache?.frontmatter;
+		if (frontMatter && frontMatter?.direction) {
+			try {
+				const direction = frontMatter.direction;
+				return direction;
+			}
+			catch (error) {}
 		}
 	}
 }
@@ -251,5 +279,14 @@ class RtlSettingsTab extends PluginSettingTab {
 							 this.plugin.adjustDirectionToCurrentFile();
 						 }));
 
+		new Setting(containerEl)
+			.setName('Set YAML direction in Preview')
+			.setDesc('For RTL notes, preview YAML blocks as RTL. (When turning off, restart of Obsidian is required.)')
+			.addToggle(toggle => toggle.setValue(this.settings.setYamlDirection ?? false)
+						 .onChange((value) => {
+							 this.settings.setYamlDirection = value;
+							 this.plugin.saveSettings();
+							 this.plugin.adjustDirectionToCurrentFile();
+						 }));
 	}
 }
