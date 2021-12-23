@@ -2,7 +2,7 @@
 
 This plugin adds configurable RTL support for [Obsidian](https://obsidian.md).
 
-It relies on the RTL `direction` property of [CodeMirror](https://codemirror.net/doc/manual.html), which is the editor component that Obsidian uses.
+It relies on the RTL support of [CodeMirror](https://codemirror.net/doc/manual.html), which is the editor component that Obsidian uses.
 Although CodeMirror supports just a global direction (no auto-detection by paragraph as we'd all love to have), within this limitation this is the real deal:
 Arabic, Hebrew and Farsi can be typed and rendered in Right-to-Left manner just as you'd expect.
 
@@ -22,6 +22,11 @@ When enabled, you will have a "Switch Text Direction" command (accessible via Ct
 ### Default text direction
 
 This is the direction to use for files on which you have not set an explicit text direction.
+
+Note that Obsidian 0.13.10 introduced basic RTL support.
+For the new editor this plugin uses the same basic mechanism as that new support, but it adds a few tweaks and overrides the setting by file.
+
+To make the user experience consistent, the plugin synchronizes the RTL setting from Obsidian's Editor pane to be the same as the "default text direction" setting.
 
 ### Remember Text Direction Per File
 
@@ -50,11 +55,18 @@ It is possible to temporarily override a note's direction regardless of the fron
 ## Known Issues
 
 - This plugin only treats the Markdown editor, preview and export. There are some areas of the app, like the Outline view, that are not covered for now.
-- Auto-pair brackets is disabled in RTL ([CodeMirror bug with a pending fix](https://github.com/esm7/obsidian-rtl/issues/7)).
-- When an RTL line ends with an LTR word, the End key misbehaves. [CodeMirror bug](https://github.com/codemirror/CodeMirror/issues/6531).
-- There are various glitches in handling some keyboard shortcuts in RTL, e.g. Ctrl+Home/Ctrl+End are not properly handled yet, Ctrl+Left lands on the wrong character and some others. These are very hard to overcome due to the patchy RTL support of the current CodeMirror versions, and occasionally I'm able to improve things a bit.
+- Obsidian Mobile not yet covered.
+- For the legacy editor (CM5):
+  - Auto-pair brackets is disabled in RTL ([CodeMirror bug with a pending fix](https://github.com/esm7/obsidian-rtl/issues/7)).
+  - When an RTL line ends with an LTR word, the End key misbehaves. [CodeMirror bug](https://github.com/codemirror/CodeMirror/issues/6531).
+  - There are various glitches in handling some keyboard shortcuts in RTL, e.g. Ctrl+Home/Ctrl+End are not properly handled yet, Ctrl+Left lands on the wrong character and some others. These are very hard to overcome due to the patchy RTL support of the current CodeMirror versions, and occasionally I'm able to improve things a bit.
+  - **None of these issues exist in the new (CM6) editor presented in Obsidian 0.13.x and above.**
 
 ## Changelog
+
+### 0.2.0
+
+- Full support for the new (CM6) editor introduced in Obsidian 0.13.x.
 
 ### 0.1.0
 
