@@ -9,8 +9,6 @@ Arabic, Hebrew and Farsi can be typed and rendered in Right-to-Left manner just 
 To my best knowledge, this is the most comprehensive RTL support any Markdown editor currently has to offer.
 Editors like Mark Text and Zettlr that support RTL, do it as a global setting rather than a per-document setting.
 
-**Important note for those using the Obsidian legacy editor!** There is a bug in the latest version that until I get to fix, you can work-around by switching to the new editor momentarily (turn off "Use legacy editor" in Obsidian's Editor settings), then switch it back.
-
 ## Usage
 
 Install the plugin via Obsidian's "Third Party Plugins" pane.
