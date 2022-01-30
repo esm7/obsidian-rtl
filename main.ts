@@ -22,7 +22,6 @@ class Settings {
 }
 
 export default class RtlPlugin extends Plugin {
-
 	public settings = new Settings();
 	private currentFile: TFile;
 	public SETTINGS_PATH = '.obsidian/rtl.json'
@@ -30,16 +29,9 @@ export default class RtlPlugin extends Plugin {
 	// This stores the value in CodeMirror's autoCloseBrackets option before overriding it, so it can be restored when
 	// we're back to LTR
 	private autoCloseBracketsValue: any = false;
+	private initialized = false;
 
 	onload() {
-		if ((this.app.vault as any).config?.legacyEditor) {
-			this.editorMode = 'cm5';
-			console.log('RTL plugin: using CodeMirror 5 mode');
-		} else {
-			this.editorMode = 'cm6';
-			console.log('RTL plugin: using CodeMirror 6 mode');
-		}
-
 		this.addCommand({
 			id: 'switch-text-direction',
 			name: 'Switch Text Direction (LTR<>RTL)',
@@ -50,7 +42,9 @@ export default class RtlPlugin extends Plugin {
 
 		this.loadSettings();
 
-		this.registerEvent(this.app.workspace.on('file-open', (file: TFile) => {
+		this.registerEvent(this.app.workspace.on('file-open', async (file: TFile) => {
+			if (!this.initialized)
+				await this.initialize();
 			if (file && file.path) {
 				this.syncDefaultDirection();
 				this.currentFile = file;
@@ -73,6 +67,19 @@ export default class RtlPlugin extends Plugin {
 			}
 		}));
 
+	}
+
+	async initialize() {
+		// Determine if we have the legacy Obsidian editor (CM5) or the new one (CM6).
+		// This is only available after Obsidian is fully loaded, so we do it as part of the `file-open` event.
+		if ('editor:toggle-source' in (this.app as any).commands.editorCommands) {
+			this.editorMode = 'cm6';
+			console.log('RTL plugin: using CodeMirror 6 mode');
+		} else {
+			this.editorMode = 'cm5';
+			console.log('RTL plugin: using CodeMirror 5 mode');
+		}
+
 		if (this.editorMode === 'cm5') {
 			this.registerCodeMirror((cm: CodeMirror.Editor) => {
 				let cmEditor = cm;
@@ -94,6 +101,8 @@ export default class RtlPlugin extends Plugin {
 				cmEditor.setOption('extraKeys', Object.assign({}, currentExtraKeys, moreKeys));
 			});
 		}
+
+		this.initialized = true;
 	}
 
 	onunload() {
@@ -200,13 +209,18 @@ export default class RtlPlugin extends Plugin {
 			false);
 	}
 
+	// Returns true if a replacement was made
 	replacePageStyleByString(searchString: string, newStyle: string, addIfNotFound: boolean) {
 		let styles = document.head.getElementsByTagName('style');
 		let found = false;
+		let alreadyExists = false;
 		for (let style of styles) {
 			if (style.getText().includes(searchString)) {
-				style.setText(newStyle);
 				found = true;
+				if (style.getText() === searchString)
+					alreadyExists = true;
+				else
+					style.setText(newStyle);
 			}
 		}
 		if (!found && addIfNotFound) {
@@ -214,6 +228,7 @@ export default class RtlPlugin extends Plugin {
 			style.textContent = newStyle;
 			document.head.appendChild(style);
 		}
+		return found && !alreadyExists;
 	}
 
 	findPageStyle(searchString: string) {

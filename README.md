@@ -64,6 +64,10 @@ It is possible to temporarily override a note's direction regardless of the fron
 
 ## Changelog
 
+### 0.2.1
+
+- Fixed an issue of detecting the legacy editor.
+
 ### 0.2.0
 
 - Full support for the new (CM6) editor introduced in Obsidian 0.13.x.
