@@ -64,6 +64,10 @@ It is possible to temporarily override a note's direction regardless of the fron
 
 ## Changelog
 
+### 0.2.2
+
+- Fixed an issue of not properly detecting the direction when the default is set as RTL (due to Obsidian's own styles).
+
 ### 0.2.1
 
 - Fixed an issue of detecting the legacy editor.

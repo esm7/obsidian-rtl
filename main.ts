@@ -170,10 +170,14 @@ export default class RtlPlugin extends Plugin {
 				containerEl.classList.add('is-rtl');
 				this.replacePageStyleByString('List indent fix',
 					`/* List indent fix */ .cm-s-obsidian .HyperMD-list-line { text-indent: 0px !important; }`, true);
+				// this.replaceStringInStyle('.markdown-source-view.mod-cm6 .cm-fold-indicator .collapse-indicator',
+					// 'right: 0;', 'right: -15px;');
 			} else {
 				containerEl.classList.remove('is-rtl');
 				this.replacePageStyleByString('List indent fix',
 					`/* List indent fix */ /* Empty rule for LTR */`, true);
+				// this.replaceStringInStyle('.markdown-source-view.mod-cm6 .cm-fold-indicator .collapse-indicator',
+					// 'right: -15px;', 'right: 0;');
 			}
 			this.replacePageStyleByString('Embedded links always LTR',
 				`/* Embedded links always LTR */ .embedded-backlinks { direction: ltr; }`, true);
@@ -211,33 +215,39 @@ export default class RtlPlugin extends Plugin {
 
 	// Returns true if a replacement was made
 	replacePageStyleByString(searchString: string, newStyle: string, addIfNotFound: boolean) {
-		let styles = document.head.getElementsByTagName('style');
-		let found = false;
 		let alreadyExists = false;
-		for (let style of styles) {
-			if (style.getText().includes(searchString)) {
-				found = true;
-				if (style.getText() === searchString)
-					alreadyExists = true;
-				else
-					style.setText(newStyle);
-			}
-		}
-		if (!found && addIfNotFound) {
+		let style = this.findPageStyle(searchString);
+		if (style) {
+			if (style.getText() === searchString)
+				alreadyExists = true;
+			else
+				style.setText(newStyle);
+		} else if (addIfNotFound) {
 			let style = document.createElement('style');
 			style.textContent = newStyle;
 			document.head.appendChild(style);
 		}
-		return found && !alreadyExists;
+		return style && !alreadyExists;
 	}
 
-	findPageStyle(searchString: string) {
-		let styles = document.head.getElementsByTagName('style');
-		for (let style of styles) {
-			if (style.getText().includes(searchString))
-				return true;
+	// Returns true if a replacement was made
+	replaceStringInStyle(searchString: string, whatToReplace: string, replacement: string) {
+		let style = this.findPageStyle(searchString);
+		if (style && style.getText().includes(whatToReplace)) {
+			const newText = style.getText().replace(whatToReplace, replacement);
+			style.textContent = newText;
+			return true;
 		}
 		return false;
+	}
+
+	findPageStyle(regex: string) {
+		let styles = document.head.getElementsByTagName('style');
+		for (let style of styles) {
+			if (style.getText().match(regex))
+				return style;
+		}
+		return null;
 	}
 
 	patchAutoCloseBrackets(cmEditor: any, newDirection: string) {
@@ -266,7 +276,7 @@ export default class RtlPlugin extends Plugin {
 			var cmEditor = this.getCmEditor();
 			return cmEditor?.getOption('direction') === 'rtl' ? 'rtl' : 'ltr';
 		} else {
-			return this.findPageStyle('direction: rtl') ? 'rtl' : 'ltr';
+			return this.findPageStyle('New editor content div.*direction: rtl') ? 'rtl' : 'ltr';
 		}
 	}
 
