@@ -17,6 +17,10 @@ When enabled, you will have a "Switch Text Direction" command (accessible via Ct
 
 **You can map this command to a hotkey:** go to Obsidian's settings, click Hotkeys, search for "RTL" and set your preferred key combination.
 
+## Support the Development
+
+If you want to support the development of this plugin, please consider to [buy me a coffee](https://www.buymeacoffee.com/esm7).
+
 ## Settings
 
 ### Default text direction
