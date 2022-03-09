@@ -1,5 +1,7 @@
 # Obsidian RTL Plugin
 
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/esm7)
+
 This plugin adds configurable RTL support for [Obsidian](https://obsidian.md).
 
 It relies on the RTL support of [CodeMirror](https://codemirror.net/doc/manual.html), which is the editor component that Obsidian uses.
