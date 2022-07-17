@@ -1,5 +1,7 @@
 # Obsidian RTL Plugin
 
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/esm7)
+
 This plugin adds configurable RTL support for [Obsidian](https://obsidian.md).
 
 It relies on the RTL support of [CodeMirror](https://codemirror.net/doc/manual.html), which is the editor component that Obsidian uses.
@@ -16,6 +18,10 @@ Install the plugin via Obsidian's "Third Party Plugins" pane.
 When enabled, you will have a "Switch Text Direction" command (accessible via Ctrl/Cmd+P if you have the Command Palette plugin enabled).
 
 **You can map this command to a hotkey:** go to Obsidian's settings, click Hotkeys, search for "RTL" and set your preferred key combination.
+
+## Support the Development
+
+If you want to support the development of this plugin, please consider to [buy me a coffee](https://www.buymeacoffee.com/esm7).
 
 ## Settings
 
