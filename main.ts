@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Plugin, PluginSettingTab, TFile, TAbstractFile, Setting } from 'obsidian';
+import { App, WorkspaceLeaf, MarkdownView, Plugin, PluginSettingTab, TFile, TAbstractFile, Setting } from 'obsidian';
 import * as codemirror from 'codemirror';
 
 class Settings {
@@ -25,7 +25,6 @@ export default class RtlPlugin extends Plugin {
 	public settings = new Settings();
 	private currentFile: TFile;
 	public SETTINGS_PATH = '.obsidian/rtl.json'
-	private editorMode: 'cm5' | 'cm6' = null;
 	// This stores the value in CodeMirror's autoCloseBrackets option before overriding it, so it can be restored when
 	// we're back to LTR
 	private autoCloseBracketsValue: any = false;
@@ -42,15 +41,16 @@ export default class RtlPlugin extends Plugin {
 
 		this.loadSettings();
 
-		this.registerEvent(this.app.workspace.on('file-open', async (file: TFile) => {
-			if (!this.initialized)
-				await this.initialize();
-			if (file && file.path) {
-				this.syncDefaultDirection();
-				this.currentFile = file;
-				this.adjustDirectionToCurrentFile();
+		this.app.workspace.on('active-leaf-change', async (leaf: WorkspaceLeaf) => {
+			if (leaf.view instanceof MarkdownView) {
+				const file = leaf.view.file;
+				await this.onFileOpen(file);
 			}
-		}));
+		});
+
+		this.app.workspace.on('file-open', async (file: TFile) => {
+			await this.onFileOpen(file);
+		});
 
 		this.registerEvent(this.app.vault.on('delete', (file: TAbstractFile) => {
 			if (file && file.path && file.path in this.settings.fileDirections) {
@@ -70,43 +70,21 @@ export default class RtlPlugin extends Plugin {
 	}
 
 	async initialize() {
-		// Determine if we have the legacy Obsidian editor (CM5) or the new one (CM6).
-		// This is only available after Obsidian is fully loaded, so we do it as part of the `file-open` event.
-		if ('editor:toggle-source' in (this.app as any).commands.editorCommands) {
-			this.editorMode = 'cm6';
-			console.log('RTL plugin: using CodeMirror 6 mode');
-		} else {
-			this.editorMode = 'cm5';
-			console.log('RTL plugin: using CodeMirror 5 mode');
-		}
-
-		if (this.editorMode === 'cm5') {
-			this.registerCodeMirror((cm: CodeMirror.Editor) => {
-				let cmEditor = cm;
-				let currentExtraKeys = cmEditor.getOption('extraKeys');
-				let moreKeys = {
-					'End': (cm: CodeMirror.Editor) => {
-						if (cm.getOption('direction') == 'rtl')
-							cm.execCommand('goLineLeftSmart');
-						else
-							cm.execCommand('goLineRight');
-					},
-					'Home': (cm: CodeMirror.Editor) => {
-						if (cm.getOption('direction') == 'rtl')
-							cm.execCommand('goLineRight');
-						else
-							cm.execCommand('goLineLeftSmart');
-					}
-				};
-				cmEditor.setOption('extraKeys', Object.assign({}, currentExtraKeys, moreKeys));
-			});
-		}
-
 		this.initialized = true;
 	}
 
 	onunload() {
 		console.log('unloading RTL plugin');
+	}
+
+	async onFileOpen(file: TFile) {
+		if (!this.initialized)
+			await this.initialize();
+		if (file && file.path) {
+			this.syncDefaultDirection();
+			this.currentFile = file;
+			this.adjustDirectionToCurrentFile();
+		}
 	}
 
 	adjustDirectionToCurrentFile() {
@@ -150,61 +128,69 @@ export default class RtlPlugin extends Plugin {
 
 	setDocumentDirection(newDirection: string) {
 		let view = this.app.workspace.getActiveViewOfType(MarkdownView);
-		// Source / Live View editor direction
-		if (this.editorMode === 'cm5') {
-			var cmEditor = this.getCmEditor();
-			if (cmEditor && cmEditor.getOption("direction") != newDirection) {
-				this.patchAutoCloseBrackets(cmEditor, newDirection);
-				cmEditor.setOption("direction", newDirection as any);
-				cmEditor.setOption("rtlMoveVisually", true);
-			}
+		if (!view || !view?.editor)
+			return;
+
+		const editorDivs = view.contentEl.getElementsByClassName('cm-editor');
+		for (const editorDiv of editorDivs) {
+			if (editorDiv instanceof HTMLDivElement)
+				this.setDocumentDirectionForEditorDiv(editorDiv, newDirection);
+		}
+		const markdownPreviews = view.contentEl.getElementsByClassName('markdown-preview-view');
+		for (const preview of markdownPreviews) {
+			if (preview instanceof HTMLDivElement) 
+				this.setDocumentDirectionForReadingDiv(preview, newDirection);
+		}
+
+		// --- General global fixes ---
+		
+		// Fix list indentation problems in RTL
+		this.replacePageStyleByString('List indent fix',
+			`/* List indent fix */ .is-rtl .HyperMD-list-line { text-indent: 0px !important; }`, true);
+		this.replacePageStyleByString('CodeMirror-rtl pre',
+			`.CodeMirror-rtl pre { text-indent: 0px !important; }`,
+			true);
+
+		// Embedded backlinks should always be shown as LTR
+		this.replacePageStyleByString('Embedded links always LTR',
+			`/* Embedded links always LTR */ .embedded-backlinks { direction: ltr; }`, true);
+
+		// Fold indicator fix (not perfect yet -- it can't be clicked)
+		this.replacePageStyleByString('Fold symbol fix',
+			`/* Fold symbol fix*/ .is-rtl .cm-fold-indicator { right: -15px !important; }`, true);
+
+		if (this.settings.setNoteTitleDirection) {
+			const container = view.containerEl.parentElement;
+			let header = container.getElementsByClassName('view-header-title-container');
+			(header[0] as HTMLDivElement).style.direction = newDirection;
+		}
+
+		view.editor.refresh();
+
+		// Set the *currently active* export direction. This is global and changes every time the user
+		// switches a pane
+		this.setExportDirection(newDirection);
+	}
+
+	setDocumentDirectionForEditorDiv(editorDiv: HTMLDivElement, newDirection: string) {
+		editorDiv.style.direction = newDirection;
+		if (newDirection === 'rtl') {
+			editorDiv.parentElement.classList.add('is-rtl');
 		} else {
-			if (!view.editor)
-				return;
-			this.replacePageStyleByString('New editor content div',
-				`/* New editor content div */ .cm-editor { direction: ${newDirection}; }`, true);
-			this.replacePageStyleByString('Markdown preview RTL',
-				`/* Markdown preview RTL */ .markdown-preview-view { direction: ${newDirection}; }`, true);
-			var containerEl = (view.editor.getDoc() as any)?.cm?.dom?.parentElement as HTMLDivElement;
-			if (newDirection === 'rtl') {
-				containerEl.classList.add('is-rtl');
-				this.replacePageStyleByString('List indent fix',
-					`/* List indent fix */ .cm-s-obsidian .HyperMD-list-line { text-indent: 0px !important; }`, true);
-				// this.replaceStringInStyle('.markdown-source-view.mod-cm6 .cm-fold-indicator .collapse-indicator',
-					// 'right: 0;', 'right: -15px;');
-			} else {
-				containerEl.classList.remove('is-rtl');
-				this.replacePageStyleByString('List indent fix',
-					`/* List indent fix */ /* Empty rule for LTR */`, true);
-				// this.replaceStringInStyle('.markdown-source-view.mod-cm6 .cm-fold-indicator .collapse-indicator',
-					// 'right: -15px;', 'right: 0;');
-			}
-			this.replacePageStyleByString('Embedded links always LTR',
-				`/* Embedded links always LTR */ .embedded-backlinks { direction: ltr; }`, true);
-			view.editor.refresh();
+			editorDiv.parentElement.classList.remove('is-rtl');
 		}
+	}
 
-		if (view) {
-			// Fix the list indentation style
-			this.replacePageStyleByString('CodeMirror-rtl pre',
-				`.CodeMirror-rtl pre { text-indent: 0px !important; }`,
-				true);
-
-			if (this.settings.setYamlDirection) {
-				const alignSide = newDirection == 'rtl' ? 'right' : 'left';
-				this.replacePageStyleByString('Patch YAML',
-					`/* Patch YAML RTL */ .language-yml code { text-align: ${alignSide}; }`, true);
-			}
-
-			if (this.settings.setNoteTitleDirection) {
-				var leafContainer = (this.app.workspace.activeLeaf as any).containerEl as Document;
-				let header = leafContainer.getElementsByClassName('view-header-title-container');
-				(header[0] as any).style.direction = newDirection;
-			}
-
-			this.setExportDirection(newDirection);
-		}
-
+	setDocumentDirectionForReadingDiv(readingDiv: HTMLDivElement, newDirection: string) {
+		readingDiv.style.direction = newDirection;
+		// Although Obsidian doesn't care about is-rtl in Markdown preview, we use it below for some more formatting
+		if (newDirection === 'rtl')
+			readingDiv.classList.add('is-rtl');
+		else
+			readingDiv.classList.remove('is-rtl');
+		if (this.settings.setYamlDirection)
+			this.replacePageStyleByString('Patch YAML',
+				`/* Patch YAML RTL */ .is-rtl .language-yaml code { text-align: right; }`, true);
 	}
 
 	setExportDirection(newDirection: string) {
@@ -230,17 +216,6 @@ export default class RtlPlugin extends Plugin {
 		return style && !alreadyExists;
 	}
 
-	// Returns true if a replacement was made
-	replaceStringInStyle(searchString: string, whatToReplace: string, replacement: string) {
-		let style = this.findPageStyle(searchString);
-		if (style && style.getText().includes(whatToReplace)) {
-			const newText = style.getText().replace(whatToReplace, replacement);
-			style.textContent = newText;
-			return true;
-		}
-		return false;
-	}
-
 	findPageStyle(regex: string) {
 		let styles = document.head.getElementsByTagName('style');
 		for (let style of styles) {
@@ -248,18 +223,6 @@ export default class RtlPlugin extends Plugin {
 				return style;
 		}
 		return null;
-	}
-
-	patchAutoCloseBrackets(cmEditor: any, newDirection: string) {
-		// Auto-close brackets doesn't work in RTL: https://github.com/esm7/obsidian-rtl/issues/7
-		// Until the actual fix is released (as part of CodeMirror), we store the value of autoCloseBrackets when
-		// switching to RTL, overriding it to 'false' and restoring it when back to LTR.
-		if (newDirection == 'rtl') {
-			this.autoCloseBracketsValue = cmEditor.getOption('autoCloseBrackets');
-			cmEditor.setOption('autoCloseBrackets', false);
-		} else {
-			cmEditor.setOption('autoCloseBrackets', this.autoCloseBracketsValue);
-		}
 	}
 
 	toggleDocumentDirection() {
@@ -272,12 +235,14 @@ export default class RtlPlugin extends Plugin {
 	}
 
 	getDocumentDirection() {
-		if (this.editorMode === 'cm5') {
-			var cmEditor = this.getCmEditor();
-			return cmEditor?.getOption('direction') === 'rtl' ? 'rtl' : 'ltr';
-		} else {
-			return this.findPageStyle('New editor content div.*direction: rtl') ? 'rtl' : 'ltr';
-		}
+		let view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (!view)
+			return 'unknown';
+		const rtlEditors = view.contentEl.getElementsByClassName('is-rtl');
+		if (rtlEditors.length > 0)
+			return 'rtl';
+		else
+			return 'ltr';
 	}
 
 	getFrontMatterDirection(file: TFile) {

@@ -55,14 +55,19 @@ It is possible to temporarily override a note's direction regardless of the fron
 ## Known Issues
 
 - This plugin only treats the Markdown editor, preview and export. There are some areas of the app, like the Outline view, that are not covered for now.
-- Obsidian Mobile not yet covered.
-- For the legacy editor (CM5):
-  - Auto-pair brackets is disabled in RTL ([CodeMirror bug with a pending fix](https://github.com/esm7/obsidian-rtl/issues/7)).
-  - When an RTL line ends with an LTR word, the End key misbehaves. [CodeMirror bug](https://github.com/codemirror/CodeMirror/issues/6531).
-  - There are various glitches in handling some keyboard shortcuts in RTL, e.g. Ctrl+Home/Ctrl+End are not properly handled yet, Ctrl+Left lands on the wrong character and some others. These are very hard to overcome due to the patchy RTL support of the current CodeMirror versions, and occasionally I'm able to improve things a bit.
-  - **None of these issues exist in the new (CM6) editor presented in Obsidian 0.13.x and above.**
 
 ## Changelog
+
+### 0.3.0
+
+**IMPORTANT: this version drops support for the legacy (CM5) Obsidian editor.**
+If you are sticking to the legacy editor until Obsidian removes it, you cannot upgrade to this version of the plugin.
+
+**This release marks a major overhaul of the way this plugin works, fixing most known bugs in the process.**
+
+- RTL/LTR is now (once again) set for a specific view instead of all the open panes.
+- All known bugs related to the plugin interfering with other parts of Obsidian (e.g. the Community Plugin view) are fixed.
+- **The plugin now works in Obsidian Mobile** (tested only on Android).
 
 ### 0.2.2
 
