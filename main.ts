@@ -1,9 +1,10 @@
-import { App, WorkspaceLeaf, MarkdownView, Plugin, PluginSettingTab, TFile, TAbstractFile, Setting } from 'obsidian';
-import * as codemirror from 'codemirror';
+import { App, WorkspaceLeaf, MarkdownView, Plugin, PluginSettingTab, TFile, TAbstractFile, Setting, Editor, editorEditorField } from 'obsidian';
+import {RTL, LTR, AUTO, RTL_CLASS, AUTO_CLASS} from 'globals';
+import {autoDirectionPlugin} from 'auto-dir-plugin';
 
 class Settings {
 	public fileDirections: { [path: string]: string } = {};
-	public defaultDirection: string = 'ltr';
+	public defaultDirection: string = LTR;
 	public rememberPerFile: boolean = true;
 	public setNoteTitleDirection: boolean = true;
 	public setYamlDirection: boolean = false;
@@ -33,9 +34,11 @@ export default class RtlPlugin extends Plugin {
 	onload() {
 		this.addCommand({
 			id: 'switch-text-direction',
-			name: 'Switch Text Direction (LTR<>RTL)',
-			callback: () => { this.toggleDocumentDirection(); }
+			name: 'Switch Text Direction (LTR->RTL->AUTO)',
+			callback: () => { this.switchDocumentDirection(); }
 		});
+
+		this.registerEditorExtension(autoDirectionPlugin);
 
 		this.addSettingTab(new RtlSettingsTab(this.app, this));
 
@@ -66,7 +69,6 @@ export default class RtlPlugin extends Plugin {
 				this.saveSettings();
 			}
 		}));
-
 	}
 
 	async initialize() {
@@ -74,6 +76,17 @@ export default class RtlPlugin extends Plugin {
 	}
 
 	onunload() {
+		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (view && view?.editor) {
+			// @ts-expect-error, not typed
+			const editorView = view.editor.cm as EditorView;
+			const plugin = editorView.plugin(autoDirectionPlugin);
+			if (plugin) {
+				plugin.setActive(false);
+				plugin.updateEx(editorView);
+			}
+		}
+
 		console.log('unloading RTL plugin');
 	}
 
@@ -92,7 +105,7 @@ export default class RtlPlugin extends Plugin {
 			let requiredDirection = null;
 			const frontMatterDirection = this.getFrontMatterDirection(this.currentFile);
 			if (frontMatterDirection) {
-				if (frontMatterDirection == 'rtl' || frontMatterDirection == 'ltr')
+				if (frontMatterDirection == RTL || frontMatterDirection == LTR || frontMatterDirection == AUTO)
 					requiredDirection = frontMatterDirection;
 				else
 					console.log('Front matter direction in file', this.currentFile.path, 'is unknown:', frontMatterDirection);
@@ -119,17 +132,19 @@ export default class RtlPlugin extends Plugin {
 			catch(error => { console.log("RTL settings file not found"); });
 	}
 
-	getCmEditor(): codemirror.Editor {
-		let view = this.app.workspace.getActiveViewOfType(MarkdownView);
-		if (view)
-			return view.sourceMode?.cmEditor;
-		return null;
-	}
-
 	setDocumentDirection(newDirection: string) {
+		console.log(newDirection);
 		let view = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!view || !view?.editor)
 			return;
+
+		// @ts-expect-error, not typed
+		const editorView = view.editor.cm as EditorView;
+		const plugin = editorView.plugin(autoDirectionPlugin);
+		if (plugin) {
+			plugin.setActive(newDirection === AUTO);
+			plugin.updateEx(editorView);
+		}
 
 		const editorDivs = view.contentEl.getElementsByClassName('cm-editor');
 		for (const editorDiv of editorDivs) {
@@ -138,15 +153,17 @@ export default class RtlPlugin extends Plugin {
 		}
 		const markdownPreviews = view.contentEl.getElementsByClassName('markdown-preview-view');
 		for (const preview of markdownPreviews) {
-			if (preview instanceof HTMLDivElement) 
+			if (preview instanceof HTMLDivElement)
 				this.setDocumentDirectionForReadingDiv(preview, newDirection);
 		}
 
 		// --- General global fixes ---
-		
+
 		// Fix list indentation problems in RTL
 		this.replacePageStyleByString('List indent fix',
 			`/* List indent fix */ .is-rtl .HyperMD-list-line { text-indent: 0px !important; }`, true);
+		this.replacePageStyleByString('List indent fixby dir',
+			`/* List indent fix by dir*/ .HyperMD-list-line[dir="rtl"] { text-indent: 0px !important; }`, true);
 		this.replacePageStyleByString('CodeMirror-rtl pre',
 			`.CodeMirror-rtl pre { text-indent: 0px !important; }`,
 			true);
@@ -158,6 +175,8 @@ export default class RtlPlugin extends Plugin {
 		// Fold indicator fix (not perfect yet -- it can't be clicked)
 		this.replacePageStyleByString('Fold symbol fix',
 			`/* Fold symbol fix*/ .is-rtl .cm-fold-indicator { right: -15px !important; }`, true);
+		this.replacePageStyleByString('Fold symbol fix by dir',
+			`/* Fold symbol fix by dir*/ [dir="rtl"] .cm-fold-indicator { right: -20px !important; }`, true);
 
 		if (this.settings.setNoteTitleDirection) {
 			const container = view.containerEl.parentElement;
@@ -169,28 +188,36 @@ export default class RtlPlugin extends Plugin {
 
 		// Set the *currently active* export direction. This is global and changes every time the user
 		// switches a pane
-		this.setExportDirection(newDirection);
-	}
-
-	setDocumentDirectionForEditorDiv(editorDiv: HTMLDivElement, newDirection: string) {
-		editorDiv.style.direction = newDirection;
-		if (newDirection === 'rtl') {
-			editorDiv.parentElement.classList.add('is-rtl');
-		} else {
-			editorDiv.parentElement.classList.remove('is-rtl');
+		if (newDirection !== AUTO) {
+			this.setExportDirection(newDirection);
 		}
 	}
 
+	setDocumentDirectionForEditorDiv(editorDiv: HTMLDivElement, newDirection: string) {
+		editorDiv.style.direction = newDirection === AUTO ? '' : newDirection;
+		this.addDirectionClassToEl(editorDiv.parentElement, newDirection);
+	}
+
 	setDocumentDirectionForReadingDiv(readingDiv: HTMLDivElement, newDirection: string) {
-		readingDiv.style.direction = newDirection;
+		readingDiv.style.direction = newDirection === AUTO ? '' : newDirection;
 		// Although Obsidian doesn't care about is-rtl in Markdown preview, we use it below for some more formatting
-		if (newDirection === 'rtl')
-			readingDiv.classList.add('is-rtl');
-		else
-			readingDiv.classList.remove('is-rtl');
+		this.addDirectionClassToEl(readingDiv, newDirection);
 		if (this.settings.setYamlDirection)
 			this.replacePageStyleByString('Patch YAML',
 				`/* Patch YAML RTL */ .is-rtl .language-yaml code { text-align: right; }`, true);
+	}
+
+	addDirectionClassToEl(el: HTMLElement|HTMLDivElement, direction: string) {
+		if (direction === RTL) {
+			el.classList.remove(AUTO_CLASS);
+			el.classList.add(RTL_CLASS);
+		} else if (direction === AUTO) {
+			el.classList.remove(RTL_CLASS);
+			el.classList.add(AUTO_CLASS);
+		} else {
+			el.classList.remove(RTL_CLASS);
+			el.classList.remove(AUTO_CLASS);
+		}
 	}
 
 	setExportDirection(newDirection: string) {
@@ -225,8 +252,22 @@ export default class RtlPlugin extends Plugin {
 		return null;
 	}
 
-	toggleDocumentDirection() {
-		let newDirection = this.getDocumentDirection() === 'ltr' ? 'rtl' : 'ltr';
+	switchDocumentDirection() {
+		let newDirection = this.getDocumentDirection();
+		switch (newDirection) {
+			case LTR:
+				newDirection = RTL;
+				break;
+			case RTL:
+				newDirection = AUTO;
+				break;
+			case AUTO:
+				newDirection = LTR;
+				break;
+			default:
+				newDirection = LTR;
+		}
+
 		this.setDocumentDirection(newDirection);
 		if (this.settings.rememberPerFile && this.currentFile && this.currentFile.path) {
 			this.settings.fileDirections[this.currentFile.path] = newDirection;
@@ -238,11 +279,15 @@ export default class RtlPlugin extends Plugin {
 		let view = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!view)
 			return 'unknown';
-		const rtlEditors = view.contentEl.getElementsByClassName('is-rtl');
+
+		const rtlEditors = view.contentEl.getElementsByClassName(RTL_CLASS),
+			autoEditors = view.contentEl.getElementsByClassName(AUTO_CLASS);
 		if (rtlEditors.length > 0)
-			return 'rtl';
+			return RTL;
+		else if (autoEditors.length > 0)
+			return AUTO;
 		else
-			return 'ltr';
+			return LTR;
 	}
 
 	getFrontMatterDirection(file: TFile) {
@@ -259,8 +304,9 @@ export default class RtlPlugin extends Plugin {
 
 	syncDefaultDirection() {
 		// Sync the plugin default direction with Obsidian's own setting
-		const obsidianDirection = (this.app.vault as any).getConfig('rightToLeft') ? 'rtl' : 'ltr';
-		if (obsidianDirection != this.settings.defaultDirection) {
+		const obsidianDirection = (this.app.vault as any).getConfig('rightToLeft') ? RTL : LTR;
+		if (obsidianDirection != this.settings.defaultDirection &&
+			this.settings.defaultDirection !== AUTO) {
 			this.settings.defaultDirection = obsidianDirection;
 			this.saveSettings();
 		}
@@ -299,12 +345,14 @@ class RtlSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Default text direction')
 			.setDesc('What should be the default text direction in Obsidian?')
-			.addDropdown(dropdown => dropdown.addOption('ltr', 'LTR')
-						 .addOption('rtl', 'RTL')
+			.addDropdown(dropdown => dropdown
+						 .addOption(LTR, 'LTR')
+						 .addOption(RTL, 'RTL')
+						 .addOption(AUTO, 'Auto')
 						 .setValue(this.settings.defaultDirection)
 						 .onChange((value) => {
 							 this.settings.defaultDirection = value;
-							 (this.app.vault as any).setConfig('rightToLeft', value == 'rtl');
+							 (this.app.vault as any).setConfig('rightToLeft', value == RTL);
 							 this.plugin.saveSettings();
 							 this.plugin.adjustDirectionToCurrentFile();
 						 }));
