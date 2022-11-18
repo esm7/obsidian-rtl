@@ -9,7 +9,7 @@ class Settings {
 	public setYamlDirection: boolean = false;
 
 	toJson() {
-		return JSON.stringify(this);
+		return JSON.stringify(this,null, "\t");
 	}
 
 	fromJson(content: string) {
