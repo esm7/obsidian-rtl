@@ -3,5 +3,3 @@ export const RTL = "rtl",
 	AUTO = "auto",
 	RTL_CLASS = "is-rtl",
 	AUTO_CLASS = "is-auto";
-
-export const RTL_LANGS = ["arb", "pes", "prs", "urd", "pan", "pbu", "heb"];

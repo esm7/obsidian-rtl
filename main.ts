@@ -94,6 +94,7 @@ export default class RtlPlugin extends Plugin {
 		if (!this.initialized)
 			await this.initialize();
 		if (file && file.path) {
+			console.log('on file open', file.path);
 			this.syncDefaultDirection();
 			this.currentFile = file;
 			this.adjustDirectionToCurrentFile();
@@ -117,6 +118,7 @@ export default class RtlPlugin extends Plugin {
 				// Use the default direction
 				requiredDirection = this.settings.defaultDirection;
 			}
+			console.log('adjustDirectionToCurrentFile');
 			this.setDocumentDirection(requiredDirection);
 		}
 	}
@@ -133,7 +135,7 @@ export default class RtlPlugin extends Plugin {
 	}
 
 	setDocumentDirection(newDirection: string) {
-		console.log(newDirection);
+		console.log('setDocumentDirection', newDirection);
 		let view = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!view || !view?.editor)
 			return;
@@ -268,6 +270,7 @@ export default class RtlPlugin extends Plugin {
 				newDirection = LTR;
 		}
 
+		console.log('switchDocumentDirection');
 		this.setDocumentDirection(newDirection);
 		if (this.settings.rememberPerFile && this.currentFile && this.currentFile.path) {
 			this.settings.fileDirections[this.currentFile.path] = newDirection;

@@ -6,12 +6,17 @@ import {
 	ViewUpdate,
 	ViewPlugin,
 } from "@codemirror/view";
-import { RangeSetBuilder } from "@codemirror/state";
-import { RTL, LTR, RTL_LANGS } from "globals";
-import { franc } from "franc";
+import { RangeSetBuilder, Text } from "@codemirror/state";
+import { RTL, LTR } from "globals";
+
+const STRONG_DIR_REGEX = /(?:([\p{sc=Arabic}\p{sc=Hebrew}])|([\p{sc=Armenian}\p{sc=Bengali}\p{sc=Bopomofo}\p{sc=Braille}\p{sc=Buhid}\p{sc=Canadian_Aboriginal}\p{sc=Cherokee}\p{sc=Cyrillic}\p{sc=Devanagari}\p{sc=Ethiopic}\p{sc=Georgian}\p{sc=Greek}\p{sc=Gujarati}\p{sc=Gurmukhi}\p{sc=Han}\p{sc=Hangul}\p{sc=Hanunoo}\p{sc=Hiragana}\p{sc=Inherited}\p{sc=Kannada}\p{sc=Katakana}\p{sc=Khmer}\p{sc=Lao}\p{sc=Latin}\p{sc=Limbu}\p{sc=Malayalam}\p{sc=Mongolian}\p{sc=Myanmar}\p{sc=Ogham}\p{sc=Oriya}\p{sc=Runic}\p{sc=Sinhala}\p{sc=Syriac}\p{sc=Tagalog}\p{sc=Tagbanwa}\p{sc=Tamil}\p{sc=Telugu}\p{sc=Thaana}\p{sc=Thai}\p{sc=Tibetan}\p{sc=Yi}]))/u;
+
+type Region = {from: number; to: number;};
+type DecorationRegion = Region & {dec: Decoration};
 
 class AutoDirectionPlugin implements PluginValue {
 	decorations: DecorationSet;
+	decorationRegions: DecorationRegion[] = [];
 	active = false;
 
 	rtlDec = Decoration.line({
@@ -25,57 +30,141 @@ class AutoDirectionPlugin implements PluginValue {
 	});
 
 	constructor(view: EditorView) {
-		this.updateEx(view);
+		this.decorations = this.buildDecorations();
 	}
 
-	update(update: ViewUpdate) {
-		if (update.docChanged || update.viewportChanged) {
-			this.updateEx(update.view);
+	update(vu: ViewUpdate) {
+		if (vu.viewportChanged || vu.docChanged) {
+			const regions: Region[] = [];
+			if (vu.docChanged) {
+				vu.changes.iterChanges((fromA, toA, fromB, toB) => {
+					console.log(fromA, toA, fromB, toB);
+					const shift = (toB-fromB) - (toA-fromA);
+					console.log(JSON.parse(JSON.stringify(this.decorationRegions)));
+					this.shiftDecorationRegions(shift < 0 ? toB : toA, shift);
+					console.log(JSON.parse(JSON.stringify(this.decorationRegions)));
+					regions.push(...this.getLineRegions(vu.state.doc, fromB, toB));
+				});
+			}
+
+			console.log('update', regions);
+			this.updateEx(vu.view, regions);
 		}
 	}
 
 	destroy() {}
 
-	buildDecorations(view: EditorView): DecorationSet {
-		const builder = new RangeSetBuilder<Decoration>();
+	setActive(active: boolean) {
+		this.active = active;
+	}
 
-		for (const { from, to } of view.visibleRanges) {
-			let defaultDec = this.ltrDec;
+	updateEx(view: EditorView, regions: Region[] = []) {
+		console.log('updateEx');
+		console.log(JSON.parse(JSON.stringify(this.decorationRegions)));
+		if (regions.length === 0) {
+			const {from, to} = view.viewport;
+			regions = this.getLineRegions(view.state.doc, from, to);
+		}
+
+		for (const { from, to } of regions) {
 			for (let pos = from; pos <= to; ) {
 				const line = view.state.doc.lineAt(pos);
 
 				let dec = this.emptyDirDec;
 				if (this.active) {
 					const s = view.state.doc.sliceString(line.from, line.to);
-					dec = this.detectDecoration(s);
-					dec = dec ? dec : defaultDec;
-					defaultDec = dec;
+					const d = this.detectDecoration(s);
+					dec = d ? d : this.lineBeforeDecoration(line.from);
 				}
 
-				builder.add(line.from, line.from, dec);
+				this.addDecorationRegion({from: line.from, to: line.to, dec});
 				pos = line.to + 1;
 			}
 		}
+
+		console.log(JSON.parse(JSON.stringify(this.decorationRegions)));
+		this.decorations = this.buildDecorations();
+	}
+
+	buildDecorations(): DecorationSet {
+		const builder = new RangeSetBuilder<Decoration>();
+		for (const dr of this.decorationRegions) {
+			builder.add(dr.from, dr.from, dr.dec);
+		}
+
 		return builder.finish();
 	}
 
-	setActive(active: boolean) {
-		this.active = active;
+	addDecorationRegion(dr: DecorationRegion) {
+		for (let i = 0; i < this.decorationRegions.length; i++) {
+			if (this.decorationRegions[i].from < dr.from) {
+				continue;
+			}
+
+			if (this.decorationRegions[i].from === dr.from) {
+				this.decorationRegions[i] = dr;
+			} else if (this.decorationRegions[i].from > dr.from) {
+				this.decorationRegions.splice(i, 0, dr);
+			}
+
+			return;
+		}
+
+		this.decorationRegions.push(dr);
 	}
 
-	updateEx(view: EditorView) {
-		this.decorations = this.buildDecorations(view);
+	shiftDecorationRegions(from: number, amount: number) {
+		console.log('shift', from, amount);
+		if (amount === 0) {
+			return;
+		}
+
+		for (let i = 0; i < this.decorationRegions.length; i++) {
+			if (this.decorationRegions[i].from < from) {
+				continue;
+			}
+
+			this.decorationRegions[i].from += amount;
+			this.decorationRegions[i].to += amount;
+
+			if (this.decorationRegions[i].from <= from) {
+				this.decorationRegions.splice(i, 1);
+				i--;
+			}
+		}
 	}
 
-	detectDecoration(s: string): Decoration {
-		const lang = franc(s, {
-			minLength: 3,
-			ignore: ["zlm", "uig"],
-		});
-		if (lang === "und")
-			return undefined;
+	detectDecoration(s: string): Decoration|null {
+		const match = s.match(STRONG_DIR_REGEX);
+		if (match && match[1]) {
+			return this.rtlDec;
+		} else if (match && match[2]) {
+			return this.ltrDec;
+		}
 
-		return RTL_LANGS.includes(lang) ? this.rtlDec : this.ltrDec;
+		return null;
+	}
+
+	lineBeforeDecoration(from: number, def=this.ltrDec): Decoration {
+		for (let i = 0; i < this.decorationRegions.length; i++) {
+			if (i !== 0 && this.decorationRegions[i].from >= from) {
+				return this.decorationRegions[i-1].dec;
+			}
+		}
+
+		return def;
+	}
+
+	getLineRegions(doc: Text, from: number, to: number): Region[] {
+		const regions: Region[] = [];
+		for (let i = from; i <= to; i++) {
+			const l = doc.lineAt(i);
+			i = l.to;
+
+			regions.push({from: l.from, to: l.to});
+		}
+
+		return regions;
 	}
 }
 
