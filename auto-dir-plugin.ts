@@ -27,7 +27,7 @@ class AutoDirectionPlugin implements PluginValue {
 		attributes: { dir: "" },
 	});
 
-	constructor(view: EditorView) {
+	constructor(_view: EditorView) {
 		this.decorations = this.buildDecorations();
 	}
 
@@ -135,7 +135,7 @@ class AutoDirectionPlugin implements PluginValue {
 	}
 
 	detectDecoration(s: string): Decoration|null {
-		const direction = detectDirection(s);
+		const direction = detectDirection(s.replace('- [x]', ''));
 		switch (direction) {
 		case RTL:
 			return this.rtlDec;
