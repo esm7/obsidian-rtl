@@ -7,9 +7,7 @@ import {
 	ViewPlugin,
 } from "@codemirror/view";
 import { RangeSetBuilder, Text } from "@codemirror/state";
-import { RTL, LTR } from "globals";
-
-const STRONG_DIR_REGEX = /(?:([\p{sc=Arabic}\p{sc=Hebrew}])|([\p{sc=Armenian}\p{sc=Bengali}\p{sc=Bopomofo}\p{sc=Braille}\p{sc=Buhid}\p{sc=Canadian_Aboriginal}\p{sc=Cherokee}\p{sc=Cyrillic}\p{sc=Devanagari}\p{sc=Ethiopic}\p{sc=Georgian}\p{sc=Greek}\p{sc=Gujarati}\p{sc=Gurmukhi}\p{sc=Han}\p{sc=Hangul}\p{sc=Hanunoo}\p{sc=Hiragana}\p{sc=Inherited}\p{sc=Kannada}\p{sc=Katakana}\p{sc=Khmer}\p{sc=Lao}\p{sc=Latin}\p{sc=Limbu}\p{sc=Malayalam}\p{sc=Mongolian}\p{sc=Myanmar}\p{sc=Ogham}\p{sc=Oriya}\p{sc=Runic}\p{sc=Sinhala}\p{sc=Syriac}\p{sc=Tagalog}\p{sc=Tagbanwa}\p{sc=Tamil}\p{sc=Telugu}\p{sc=Thaana}\p{sc=Thai}\p{sc=Tibetan}\p{sc=Yi}]))/u;
+import { RTL, LTR, detectDirection } from "globals";
 
 type Region = {from: number; to: number;};
 type DecorationRegion = Region & {dec: Decoration};
@@ -40,9 +38,8 @@ class AutoDirectionPlugin implements PluginValue {
 				vu.changes.iterChanges((fromA, toA, fromB, toB) => {
 					console.log(fromA, toA, fromB, toB);
 					const shift = (toB-fromB) - (toA-fromA);
-					console.log(JSON.parse(JSON.stringify(this.decorationRegions)));
 					this.shiftDecorationRegions(shift < 0 ? toB : toA, shift);
-					console.log(JSON.parse(JSON.stringify(this.decorationRegions)));
+
 					regions.push(...this.getLineRegions(vu.state.doc, fromB, toB));
 				});
 			}
@@ -54,13 +51,17 @@ class AutoDirectionPlugin implements PluginValue {
 
 	destroy() {}
 
-	setActive(active: boolean) {
+	setActive(active: boolean, view: EditorView) {
+		const forceUpdate = this.active !== active;
 		this.active = active;
+
+		if (forceUpdate) {
+			this.updateEx(view);
+		}
 	}
 
 	updateEx(view: EditorView, regions: Region[] = []) {
 		console.log('updateEx');
-		console.log(JSON.parse(JSON.stringify(this.decorationRegions)));
 		if (regions.length === 0) {
 			const {from, to} = view.viewport;
 			regions = this.getLineRegions(view.state.doc, from, to);
@@ -82,7 +83,6 @@ class AutoDirectionPlugin implements PluginValue {
 			}
 		}
 
-		console.log(JSON.parse(JSON.stringify(this.decorationRegions)));
 		this.decorations = this.buildDecorations();
 	}
 
@@ -135,10 +135,11 @@ class AutoDirectionPlugin implements PluginValue {
 	}
 
 	detectDecoration(s: string): Decoration|null {
-		const match = s.match(STRONG_DIR_REGEX);
-		if (match && match[1]) {
+		const direction = detectDirection(s);
+		switch (direction) {
+		case RTL:
 			return this.rtlDec;
-		} else if (match && match[2]) {
+		case LTR:
 			return this.ltrDec;
 		}
 

@@ -9,3 +9,54 @@
 		display: inline-block;
 	}
 }
+
+.markdown-source-view.mod-cm6 .cm-line[dir="rtl"] .task-list-label {
+	margin-left: 0;
+	margin-right: -3px;
+}
+
+.markdown-rendered .esm-rtl {
+	direction: rtl;
+	text-align: right;
+}
+
+.markdown-rendered .esm-rtl > .list-bullet {
+	float: right;
+	margin-right: -12px;
+}
+
+.markdown-rendered.show-indentation-guide li.esm-rtl > ul::before, .markdown-rendered.show-indentation-guide li.esm-rtl > ol::before {
+	left: auto;
+	right: -15px;
+}
+
+.markdown-preview-view .esm-rtl > .collapse-indicator {
+	float: right;
+}
+
+.markdown-rendered .esm-rtl > .list-collapse-indicator {
+	margin-right: -45px;
+	padding-left: 18px;
+}
+
+.markdown-preview-view .esm-rtl > .heading-collapse-indicator {
+	margin-right: -22px;
+}
+
+.markdown-preview-view .esm-rtl > .collapse-icon .is-collapsed .collapse-icon svg.svg-icon {
+	transform: rotate(90deg);
+}
+
+.markdown-preview-view .is-collapsed .esm-rtl > .collapse-icon svg.svg-icon {
+	transform: rotate(90deg);
+}
+
+.markdown-preview-view .esm-rtl > .task-list-item-checkbox {
+	margin-left: 6px;
+	margin-right: 0;
+}
+
+.markdown-rendered .esm-ltr {
+	direction: ltr;
+	text-align-last: left;
+}
