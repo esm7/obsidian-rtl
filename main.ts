@@ -149,6 +149,8 @@ export default class RtlPlugin extends Plugin {
 		const plugin = editorView.plugin(autoDirectionPlugin);
 		if (plugin) {
 			plugin.setActive(newDirection === AUTO, editorView);
+			editorView.dom.querySelector('.inline-title')
+				.setAttribute('dir', newDirection === AUTO ? 'auto' : '');
 		}
 
 		const editorDivs = view.contentEl.getElementsByClassName('cm-editor');
