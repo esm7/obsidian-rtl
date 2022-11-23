@@ -146,7 +146,12 @@ class AutoDirectionPlugin implements PluginValue {
 	}
 
 	lineBeforeDecoration(from: number, def=this.ltrDec): Decoration {
-		for (let i = 0; i < this.decorationRegions.length; i++) {
+		const l = this.decorationRegions.length;
+		if (l !== 0 && from > this.decorationRegions[l-1].from) {
+			return this.decorationRegions[l-1].dec;
+		}
+
+		for (let i = 0; i < l; i++) {
 			if (i !== 0 && this.decorationRegions[i].from >= from) {
 				return this.decorationRegions[i-1].dec;
 			}
