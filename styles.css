@@ -10,7 +10,7 @@
 	}
 }
 
-.markdown-source-view.mod-cm6 .cm-line[dir="rtl"] .task-list-label {
+.markdown-source-view .cm-line[dir="rtl"] .task-list-label {
 	margin-left: 0;
 	margin-right: -3px;
 }
