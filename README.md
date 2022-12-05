@@ -6,7 +6,7 @@ This plugin adds configurable RTL support for [Obsidian](https://obsidian.md).
 
 It relies on the RTL support of [CodeMirror](https://codemirror.net/doc/manual.html), which is the editor component that Obsidian uses.
 Although CodeMirror supports just a global direction (no auto-detection by paragraph as we'd all love to have), within this limitation this is the real deal:
-Arabic, Hebrew and Farsi can be typed and rendered in Right-to-Left manner just as you'd expect.
+Arabic, Hebrew and Persian (Farsi) can be typed and rendered in Right-to-Left manner just as you'd expect.
 
 To my best knowledge, this is the most comprehensive RTL support any Markdown editor currently has to offer.
 Editors like Mark Text and Zettlr that support RTL, do it as a global setting rather than a per-document setting.
@@ -38,7 +38,7 @@ To make the user experience consistent, the plugin synchronizes the RTL setting 
 
 When enabled (which is the default), when you change the text direction of a file it will be saved.
 Every time you open that file it will use the same text direction regardless of the default.
-This is useful, for example, if most of your notes are in English (so you want to keep the default LTR) but you have some notes in Arabic/Hebrew/Farsi and you'd like to always edit them in RTL.
+This is useful, for example, if most of your notes are in English (so you want to keep the default LTR) but you have some notes in Arabic/Hebrew/Persian (Farsi) and you'd like to always edit them in RTL.
 
 If you disable this setting, all notes will load in the default text direction.
 
