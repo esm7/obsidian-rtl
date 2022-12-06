@@ -39,7 +39,6 @@ class AutoDirectionPlugin implements PluginValue {
 			const regions: Region[] = [];
 			if (vu.docChanged) {
 				vu.changes.iterChanges((fromA, toA, fromB, toB) => {
-					console.log(fromA, toA, fromB, toB);
 					const shift = (toB-fromB) - (toA-fromA);
 					this.shiftDecorationRegions(shift < 0 ? toB : toA, shift);
 
@@ -47,7 +46,6 @@ class AutoDirectionPlugin implements PluginValue {
 				});
 			}
 
-			console.log('update', regions);
 			this.updateEx(vu.view, regions);
 		}
 	}
@@ -64,7 +62,6 @@ class AutoDirectionPlugin implements PluginValue {
 	}
 
 	updateEx(view: EditorView, regions: Region[] = []) {
-		console.log('updateEx');
 		if (regions.length === 0) {
 			const {from, to} = view.viewport;
 			regions = this.getLineRegions(view.state.doc, from, to);
@@ -117,7 +114,6 @@ class AutoDirectionPlugin implements PluginValue {
 	}
 
 	shiftDecorationRegions(from: number, amount: number) {
-		console.log('shift', from, amount);
 		if (amount === 0) {
 			return;
 		}
