@@ -7,7 +7,7 @@ import {
 	ViewPlugin,
 } from "@codemirror/view";
 import { RangeSetBuilder, Text } from "@codemirror/state";
-import { RTL, LTR, detectDirection } from "globals";
+import { RTL, LTR, AUTO, detectDirection } from "globals";
 
 type Region = {from: number; to: number;};
 type DecorationRegion = Region & {dec: Decoration};
@@ -25,6 +25,9 @@ class AutoDirectionPlugin implements PluginValue {
 	});
 	emptyDirDec = Decoration.line({
 		attributes: { dir: "" },
+	});
+	autoDec = Decoration.line({
+		attributes: { dir: AUTO },
 	});
 
 	constructor(_view: EditorView) {

@@ -40,6 +40,7 @@ export default class RtlPlugin extends Plugin {
 		});
 
 		this.registerEditorExtension(autoDirectionPlugin);
+		this.registerMarkdownPostProcessor(autoDirectionPostProcessor);
 
 		this.addSettingTab(new RtlSettingsTab(this.app, this));
 
@@ -72,8 +73,6 @@ export default class RtlPlugin extends Plugin {
 				this.saveSettings();
 			}
 		}));
-
-		this.registerMarkdownPostProcessor(autoDirectionPostProcessor);
 	}
 
 	async initialize() {
@@ -153,7 +152,7 @@ export default class RtlPlugin extends Plugin {
 			if (!title) {
 				title = view.previewMode.containerEl.querySelector('.inline-title');
 			}
-			title.setAttribute('dir', newDirection === AUTO ? 'auto' : '');
+			title?.setAttribute('dir', newDirection === AUTO ? 'auto' : '');
 		}
 
 		const editorDivs = view.contentEl.getElementsByClassName('cm-editor');
@@ -170,10 +169,10 @@ export default class RtlPlugin extends Plugin {
 		// --- General global fixes ---
 
 		// Fix list indentation problems in RTL
-		// this.replacePageStyleByString('List indent fix',
-		// 	`/* List indent fix */ .is-rtl .HyperMD-list-line { text-indent: 0px !important; }`, true);
-		// this.replacePageStyleByString('List indent fixby dir',
-		// 	`/* List indent fix by dir*/ .HyperMD-list-line[dir="rtl"] { text-indent: 0px !important; }`, true);
+		this.replacePageStyleByString('List indent fix',
+			`/* List indent fix */ .is-rtl .HyperMD-list-line { text-indent: 0px !important; }`, true);
+		this.replacePageStyleByString('List indent fixby dir',
+			`/* List indent fix by dir*/ .HyperMD-list-line[dir="rtl"] { text-indent: 0px !important; }`, true);
 		this.replacePageStyleByString('CodeMirror-rtl pre',
 			`.CodeMirror-rtl pre { text-indent: 0px !important; }`,
 			true);

@@ -14,7 +14,11 @@ export const autoDirectionPostProcessor = (el: HTMLElement, ctx: MarkdownPostPro
 			if (dir) {
 				addedDir = true;
 				lastDetectedDir = dir;
-				el.addClass(dirClass(dir));
+				if (el.nodeName === 'A' && el.parentElement) {
+					el.parentElement.addClass(dirClass(dir))
+				} else {
+					el.addClass(dirClass(dir));
+				}
 			}
 
 			shouldAddDir = true;

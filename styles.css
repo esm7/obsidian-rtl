@@ -15,7 +15,13 @@
 	margin-right: -3px;
 }
 
-.markdown-rendered .esm-rtl {
+.markdown-source-view .HyperMD-header.cm-line[dir="rtl"] .collapse-indicator {
+	padding-right: 0;
+	padding-left: 6px;
+	right: -16px;
+}
+
+.markdown-rendered .esm-rtl, .kanban-plugin__board .esm-rtl {
 	direction: rtl;
 	text-align: right;
 }
