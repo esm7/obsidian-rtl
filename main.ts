@@ -166,8 +166,6 @@ export default class RtlPlugin extends Plugin {
 		// Fix list indentation problems in RTL
 		this.replacePageStyleByString('List indent fix',
 			`/* List indent fix */ .is-rtl .HyperMD-list-line { text-indent: 0px !important; }`, true);
-		this.replacePageStyleByString('List indent fixby dir',
-			`/* List indent fix by dir*/ .HyperMD-list-line[dir="rtl"] { text-indent: 0px !important; }`, true);
 		this.replacePageStyleByString('CodeMirror-rtl pre',
 			`.CodeMirror-rtl pre { text-indent: 0px !important; }`,
 			true);
@@ -179,8 +177,6 @@ export default class RtlPlugin extends Plugin {
 		// Fold indicator fix (not perfect yet -- it can't be clicked)
 		this.replacePageStyleByString('Fold symbol fix',
 			`/* Fold symbol fix*/ .is-rtl .cm-fold-indicator { right: -15px !important; }`, true);
-		this.replacePageStyleByString('Fold symbol fix by dir',
-			`/* Fold symbol fix by dir*/ [dir="rtl"] .cm-fold-indicator { right: -20px !important; }`, true);
 
 		if (this.settings.setNoteTitleDirection) {
 			const container = view.containerEl.parentElement;
