@@ -1,68 +1,119 @@
 @media print {
-	/* This is searched and replaced by the plugin according to the document direction */
-	body {
-		direction: ltr;
-	}
-	
 	span.cm-tab {
 		width: 50px !important;
 		display: inline-block;
 	}
 }
 
+/* List indent fix */
+.is-mobile .is-rtl .HyperMD-list-line, .is-mobile .HyperMD-list-line[dir="rtl"] {
+	text-indent: 0px !important;
+	padding-left: 0 !important;
+}
+
+.CodeMirror-rtl pre {
+	text-indent: 0px !important;
+}
+
+/* Embedded links always LTR */
+.embedded-backlinks {
+	direction: ltr;
+}
+
+/* Patch YAML RTL */
+.is-rtl .rtl-yaml .language-yaml code {
+	text-align: right;
+}
+
+
 .markdown-source-view .cm-line[dir="rtl"] .task-list-label {
 	margin-left: 0;
 	margin-right: -3px;
 }
 
+.outliner-plugin-better-bullets .markdown-source-view.is-rtl .cm-formatting-list-ul,
+.outliner-plugin-better-bullets .markdown-source-view .cm-line[dir="rtl"] .cm-formatting-list-ul {
+	margin-right: 0;
+	margin-left: 0.3em;
+}
+
+.markdown-source-view.is-rtl .HyperMD-header .collapse-indicator,
 .markdown-source-view .HyperMD-header.cm-line[dir="rtl"] .collapse-indicator {
 	padding-right: 0;
 	padding-left: 6px;
 	right: -16px;
 }
 
-.markdown-rendered .esm-rtl, .kanban-plugin__board .esm-rtl {
+.markdown-source-view.is-rtl .is-collapsed .collapse-indicator svg.svg-icon,
+.markdown-source-view .cm-line[dir="rtl"] .is-collapsed .collapse-indicator svg.svg-icon {
+	transform: rotate(90deg);
+}
+
+.markdown-source-view.is-rtl .cm-line .cm-fold-indicator .collapse-indicator,
+.markdown-source-view .cm-line[dir="rtl"] .cm-fold-indicator .collapse-indicator {
+	padding-right: 0;
+	padding-left: 6px;
+	right: -16px;
+}
+
+.markdown-source-view.is-rtl .cm-line:not(.cm-active):not(.HyperMD-header):not(.HyperMD-task-line) .cm-fold-indicator .collapse-indicator,
+.markdown-source-view .cm-line[dir="rtl"]:not(.cm-active):not(.HyperMD-header):not(.HyperMD-task-line) .cm-fold-indicator .collapse-indicator {
+	padding-right: 0;
+	padding-left: 18px;
+	right: -16px;
+}
+
+.markdown-preview-view.is-auto .esm-rtl, .kanban-plugin__board .esm-rtl {
 	direction: rtl;
 	text-align: right;
 }
 
-.markdown-rendered .esm-rtl > .list-bullet {
+.markdown-preview-view.is-auto .esm-rtl > .list-bullet,
+.markdown-preview-view.is-rtl .list-bullet {
 	float: right;
 	margin-right: -12px;
 }
 
-.markdown-rendered.show-indentation-guide li.esm-rtl > ul::before, .markdown-rendered.show-indentation-guide li.esm-rtl > ol::before {
+.markdown-preview-view.is-auto.show-indentation-guide li.esm-rtl > ul::before,
+.markdown-preview-view.is-auto.show-indentation-guide li.esm-rtl > ol::before {
 	left: auto;
 	right: -15px;
 }
 
-.markdown-preview-view .esm-rtl > .collapse-indicator {
+.markdown-preview-view.is-auto .esm-rtl > .collapse-indicator,
+.markdown-preview-view.is-rtl .collapse-indicator {
 	float: right;
 }
 
-.markdown-rendered .esm-rtl > .list-collapse-indicator {
-	margin-right: -45px;
+.markdown-preview-view.is-auto .esm-rtl > .list-collapse-indicator,
+.markdown-preview-view.is-rtl .list-collapse-indicator {
+	margin-right: -48px;
 	padding-left: 18px;
 }
 
-.markdown-preview-view .esm-rtl > .heading-collapse-indicator {
+.markdown-preview-view.is-auto .esm-rtl > .heading-collapse-indicator,
+.markdown-preview-view.is-rtl .heading-collapse-indicator {
 	margin-right: -22px;
 }
 
-.markdown-preview-view .esm-rtl > .collapse-icon .is-collapsed .collapse-icon svg.svg-icon {
+.markdown-preview-view.is-auto .esm-rtl > .collapse-icon .is-collapsed svg.svg-icon,
+.markdown-preview-view.is-auto .esm-rtl.is-collapsed > .collapse-icon svg.svg-icon,
+.markdown-preview-view.is-rtl .collapse-icon .is-collapsed svg.svg-icon {
 	transform: rotate(90deg);
 }
 
-.markdown-preview-view .is-collapsed .esm-rtl > .collapse-icon svg.svg-icon {
+.markdown-preview-view .is-collapsed .esm-rtl > .collapse-icon svg.svg-icon,
+.markdown-preview-view.is-rtl .collapse-icon svg.svg-icon {
 	transform: rotate(90deg);
 }
 
-.markdown-preview-view .esm-rtl > .task-list-item-checkbox {
+.markdown-preview-view.is-auto .esm-rtl > .task-list-item-checkbox,
+.markdown-preview-view.is-rtl .task-list-item-checkbox {
 	margin-left: 6px;
 	margin-right: 0;
 }
 
-.markdown-rendered .esm-ltr {
+.markdown-preview-view.is-auto .esm-ltr {
 	direction: ltr;
 	text-align-last: left;
 }

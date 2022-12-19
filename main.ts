@@ -1,4 +1,4 @@
-import { App, WorkspaceLeaf, MarkdownView, Plugin, PluginSettingTab, TFile, TAbstractFile, Setting, Editor, editorEditorField } from 'obsidian';
+import { App, WorkspaceLeaf, MarkdownView, Plugin, PluginSettingTab, TFile, TAbstractFile, Setting } from 'obsidian';
 import {RTL, LTR, AUTO, RTL_CLASS, AUTO_CLASS} from 'globals';
 import {autoDirectionPlugin} from 'auto-dir-plugin';
 import {autoDirectionPostProcessor} from 'auto-dir-post-processor';
@@ -163,21 +163,6 @@ export default class RtlPlugin extends Plugin {
 
 		// --- General global fixes ---
 
-		// Fix list indentation problems in RTL
-		this.replacePageStyleByString('List indent fix',
-			`/* List indent fix */ .is-rtl .HyperMD-list-line { text-indent: 0px !important; }`, true);
-		this.replacePageStyleByString('CodeMirror-rtl pre',
-			`.CodeMirror-rtl pre { text-indent: 0px !important; }`,
-			true);
-
-		// Embedded backlinks should always be shown as LTR
-		this.replacePageStyleByString('Embedded links always LTR',
-			`/* Embedded links always LTR */ .embedded-backlinks { direction: ltr; }`, true);
-
-		// Fold indicator fix (not perfect yet -- it can't be clicked)
-		this.replacePageStyleByString('Fold symbol fix',
-			`/* Fold symbol fix*/ .is-rtl .cm-fold-indicator { right: -15px !important; }`, true);
-
 		if (this.settings.setNoteTitleDirection) {
 			const container = view.containerEl.parentElement;
 			let header = container.getElementsByClassName('view-header-title-container');
@@ -202,9 +187,9 @@ export default class RtlPlugin extends Plugin {
 		readingDiv.style.direction = newDirection === AUTO ? '' : newDirection;
 		// Although Obsidian doesn't care about is-rtl in Markdown preview, we use it below for some more formatting
 		this.addDirectionClassToEl(readingDiv, newDirection);
-		if (this.settings.setYamlDirection)
-			this.replacePageStyleByString('Patch YAML',
-				`/* Patch YAML RTL */ .is-rtl .language-yaml code { text-align: right; }`, true);
+		readingDiv.classList.remove('rtl-yaml');
+		if (newDirection !== AUTO)
+			readingDiv.classList.add('rtl-yaml');
 	}
 
 	addDirectionClassToEl(el: HTMLElement|HTMLDivElement, direction: string) {
@@ -223,7 +208,7 @@ export default class RtlPlugin extends Plugin {
 	setExportDirection(newDirection: string) {
 		this.replacePageStyleByString('searched and replaced',
 			`/* This is searched and replaced by the plugin */ @media print { body { direction: ${newDirection}; } }`,
-			false);
+			true);
 	}
 
 	// Returns true if a replacement was made
