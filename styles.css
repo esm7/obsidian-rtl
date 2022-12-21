@@ -3,6 +3,16 @@
 		width: 50px !important;
 		display: inline-block;
 	}
+
+	.is-auto .esm-ltr {
+		direction: ltr;
+		text-align-last: left;
+	}
+
+	.is-auto .esm-rtl {
+		direction: rtl;
+		text-align: right;
+	}
 }
 
 /* List indent fix */
