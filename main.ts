@@ -12,6 +12,7 @@ class Settings {
 	public rememberPerFile: boolean = true;
 	public setNoteTitleDirection: boolean = true;
 	public setYamlDirection: boolean = false;
+	public statusBar: boolean = true;
 
 	toJson() {
 		return JSON.stringify(this);
@@ -31,6 +32,7 @@ export default class RtlPlugin extends Plugin {
 	private currentFile: TFile;
 	public SETTINGS_PATH = '.obsidian/rtl.json'
 	private initialized = false;
+	private statusBarItem: HTMLElement = null;
 
 	onload() {
 		this.addCommand({
@@ -71,6 +73,13 @@ export default class RtlPlugin extends Plugin {
 				this.saveSettings();
 			}
 		}));
+
+		this.statusBarItem = this.addStatusBarItem();
+		this.statusBarItem.title = 'Text direction';
+		this.statusBarItem.addClass('mod-clickable');
+		this.statusBarItem.addEventListener('click', _ev => {
+			this.switchDocumentDirection();
+		});
 	}
 
 	async initialize() {
@@ -106,6 +115,7 @@ export default class RtlPlugin extends Plugin {
 		if (this.currentFile && this.currentFile.path) {
 			let requiredDirection = null;
 			const frontMatterDirection = this.getFrontMatterDirection(this.currentFile);
+			let usedDefault = false;
 			if (frontMatterDirection) {
 				if (frontMatterDirection == 'rtl' || frontMatterDirection == 'ltr' || frontMatterDirection == 'auto')
 					requiredDirection = frontMatterDirection;
@@ -118,8 +128,9 @@ export default class RtlPlugin extends Plugin {
 			} else {
 				// Use the default direction
 				requiredDirection = this.settings.defaultDirection;
+				usedDefault = true;
 			}
-			this.setDocumentDirection(requiredDirection);
+			this.setDocumentDirection(requiredDirection, usedDefault);
 		}
 	}
 
@@ -134,10 +145,32 @@ export default class RtlPlugin extends Plugin {
 			catch(error => { console.log("RTL settings file not found"); });
 	}
 
-	setDocumentDirection(newDirection: Direction) {
+	setStatusBar(direction: Direction, usedDefault: boolean) {
+		if (this.settings.statusBar) {
+			let directionString = direction === 'auto' ? 'auto' : (direction === 'ltr' ? 'LTR' : 'RTL');
+			let statusString = '';
+			if (usedDefault)
+				statusString = `Default (${direction})`;
+			else {
+				if (direction === 'auto')
+					statusString = 'Auto';
+				else
+					statusString = directionString;
+			}
+			this.statusBarItem.textContent = statusString;
+			this.statusBarItem.style.display = null;
+		} else {
+			this.statusBarItem.style.display = 'none';
+			this.statusBarItem.textContent = '';
+		}
+	}
+
+	setDocumentDirection(newDirection: Direction, usedDefault: boolean) {
 		let view = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!view || !view?.editor)
 			return;
+
+		this.setStatusBar(newDirection, usedDefault);
 
 		//@ts-ignore
 		const editorView = view.editor.cm as EditorView;
@@ -364,5 +397,15 @@ class RtlSettingsTab extends PluginSettingTab {
 							 this.plugin.saveSettings();
 							 this.plugin.adjustDirectionToCurrentFile();
 						 }));
+
+		new Setting(containerEl)
+			.setName('Show status bar item')
+			.setDesc('Show a clickable status bar item showing the current direction.')
+			.addToggle(toggle => toggle.setValue(this.settings.statusBar ?? true)
+				.onChange((value) => {
+					this.settings.statusBar = value;
+					this.plugin.saveSettings();
+					this.plugin.adjustDirectionToCurrentFile();
+				}));
 	}
 }
