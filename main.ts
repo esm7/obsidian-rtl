@@ -2,10 +2,7 @@ import { Notice, App, WorkspaceLeaf, MarkdownView, Plugin, PluginSettingTab, TFi
 import { autoDirectionPlugin } from './AutoDirPlugin';
 import { autoDirectionPostProcessor } from './AutoDirPostProcessor';
 import { EditorView } from '@codemirror/view';
-
-type Direction = 'ltr' | 'rtl' | 'auto';
-const RTL_CLASS = 'is-rtl';
-const AUTO_CLASS = 'is-auto';
+import { Direction, RTL_CLASS, AUTO_CLASS } from 'globals';
 
 class Settings {
 	public fileDirections: { [path: string]: Direction } = {};
@@ -291,7 +288,7 @@ export default class RtlPlugin extends Plugin {
 		}
 		new Notice(`Document direction set to ${newDirection}`, 500);
 
-		this.setDocumentDirection(newDirection);
+		this.setDocumentDirection(newDirection, false);
 		if (this.settings.rememberPerFile && this.currentFile && this.currentFile.path) {
 			this.settings.fileDirections[this.currentFile.path] = newDirection;
 			this.saveSettings();
