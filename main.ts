@@ -1,5 +1,6 @@
 import { Notice, App, WorkspaceLeaf, MarkdownView, Plugin, PluginSettingTab, TFile, TAbstractFile, Setting } from 'obsidian';
 import { autoDirectionPlugin } from './AutoDirPlugin';
+import { autoDirectionPostProcessor } from './AutoDirPostProcessor';
 import { EditorView } from '@codemirror/view';
 
 type Direction = 'ltr' | 'rtl' | 'auto';
@@ -43,6 +44,7 @@ export default class RtlPlugin extends Plugin {
 
 		this.registerEditorExtension(autoDirectionPlugin);
 		this.registerEditorExtension(EditorView.perLineTextDirection.of(true));
+		this.registerMarkdownPostProcessor(autoDirectionPostProcessor);
 
 		this.addSettingTab(new RtlSettingsTab(this.app, this));
 
