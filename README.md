@@ -4,24 +4,33 @@
 
 This plugin adds configurable RTL support for [Obsidian](https://obsidian.md).
 
-It relies on the RTL support of [CodeMirror](https://codemirror.net/doc/manual.html), which is the editor component that Obsidian uses.
-Although CodeMirror supports just a global direction (no auto-detection by paragraph as we'd all love to have), within this limitation this is the real deal:
-Arabic, Hebrew and Farsi can be typed and rendered in Right-to-Left manner just as you'd expect.
+It relies on the RTL support of [CodeMirror](https://codemirror.net/doc/manual.html), which is the editor component that Obsidian uses, and contains lots of custom code on top of it to provide a smooth experience within Obsidian.
+You can set a global direction per file (LTR/RTL) or use Auto which decides on each line individually based on the first strongly indicative character.
+
+This is the real deal: Arabic, Hebrew and Persian (Farsi) can be combined with LTR languages freely and render just as you'd expect.
 
 To my best knowledge, this is the most comprehensive RTL support any Markdown editor currently has to offer.
-Editors like Mark Text and Zettlr that support RTL, do it as a global setting rather than a per-document setting.
+Many editors offer RTL support as a global setting rather than a per-document setting -- while this plugin supports both a per-document global LTR/RTL setting and an Auto mode that can mix many directions in the same note.
 
 ## Usage
 
 Install the plugin via Obsidian's "Third Party Plugins" pane.
 
 When enabled, you will have a "Switch Text Direction" command (accessible via Ctrl/Cmd+P if you have the Command Palette plugin enabled).
-
 **You can map this command to a hotkey:** go to Obsidian's settings, click Hotkeys, search for "RTL" and set your preferred key combination.
+
+Alternatively, you should see a text direction status bar item that will toggle the document direction when clicked.
 
 ## Support the Development
 
 If you want to support the development of this plugin, please consider to [buy me a coffee](https://www.buymeacoffee.com/esm7).
+
+## A Note on Auto Text Direction
+
+Version 1.0.0 of this plugin introduced an "auto" mode that detects the direction of each line individually and enables mixed LTR/RTL in the same note.
+This mechanism is based on the "per line text direction" support for CodeMirror that was added a few months earlier, but it tweaks it extensively in order to reach the best user experience that we could (and thanks @zoli for being the first to figure out how to utilize this in an editor plugin!)
+
+As of January 2023 when this is introduced, this feature should be regarded as experimental; it may not work perfectly in 100% of the cases.
 
 ## Settings
 
@@ -30,7 +39,7 @@ If you want to support the development of this plugin, please consider to [buy m
 This is the direction to use for files on which you have not set an explicit text direction.
 
 Note that Obsidian 0.13.10 introduced basic RTL support.
-For the new editor this plugin uses the same basic mechanism as that new support, but it adds a few tweaks and overrides the setting by file.
+For strict RTL mode this plugin uses the same basic mechanism as that new support, but it adds a few tweaks and overrides the setting by file.
 
 To make the user experience consistent, the plugin synchronizes the RTL setting from Obsidian's Editor pane to be the same as the "default text direction" setting.
 
@@ -58,11 +67,20 @@ The front matter direction overrides any other setting.
 It is possible to temporarily override a note's direction regardless of the front matter (e.g. to edit or view it differently), but the next time the note is loaded, the front matter direction will always be used.
 
 
-## Known Issues
-
-- This plugin only treats the Markdown editor, preview and export. There are some areas of the app, like the Outline view, that are not covered for now.
-
 ## Changelog
+
+### 1.0.0
+
+**With a lot of great help from [@zoli](https://github.com/zoli), and following the support for this feature that was added in CodeMirror a few months ago, this version introduces dynamic & auto RTL-LTR!**
+
+AFAIK this mode works really well without any artifacts, no cursor problems or other issues, but there could definitely be some edge cases we didn't test.
+
+Each note can now be set to LTR, RTL or Auto, and a default can be set in the plugin settings.
+And as always, the plugin remembers the setting per file.
+
+**Other improvements:**
+- A status bar item with the current direction (or 'auto') was added, and can be turned off in the settings.
+- Some general maintenance work for the plugin, which was originally written while Obsidian's API was in its early infancy, and contained lots of legacy code.
 
 ### 0.3.0
 

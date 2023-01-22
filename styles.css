@@ -31,10 +31,42 @@
 }
 
 /* Patch YAML RTL */
-.is-rtl .rtl-yaml .language-yaml code {
+/* In a preview that is strictly RTL (is-rtl) and the settings ask to right-aline YAML (rtl-yaml), set a YAML block to RTL. */
+.is-rtl.rtl-yaml code.language-yaml {
 	text-align: right;
 }
+/* Then move the 'copy' button to the left */
+.is-rtl.rtl-yaml code.language-yaml + button.copy-code-button {
+	right: unset;
+	left: 0;
+}
+/* In a preview that is auto (is-auto), and the YAML was detected as RTL (esm-rtl), set the 'copy' button to the left */
+.is-auto .esm-rtl.language-yaml + button.copy-code-button {
+	right: unset;
+	left: 0;
+}
 
+/* In RTL, or in Auto with a first line that is RTL, set the flair (where it says e.g. 'yaml' in Edit mode) to the left */
+.is-rtl div:has(.HyperMD-codeblock-begin) .code-block-flair,
+.is-auto div:has(.HyperMD-codeblock-begin + .HyperMD-codeblock[dir="rtl"]) .code-block-flair {
+	right: unset;
+	left: 6px;
+}
+
+/* RTL and Auto callout titles that are detected as RTL - set to the right */
+.is-rtl .callout-title:has(.esm-rtl),
+.is-auto .callout-title:has(.esm-rtl) {
+	direction: rtl;
+}
+.is-auto .callout-content .esm-rtl {
+	direction: rtl;
+}
+/* When an RTL callout title was set to the right, left-justify its edit block button */
+.is-rtl div.cm-callout:has(.callout-title .esm-rtl) .edit-block-button,
+.is-auto div.cm-callout:has(.callout-title .esm-rtl) .edit-block-button {
+	right: unset;
+	left: var(--size-2-2);
+}
 
 .markdown-source-view .cm-line[dir="rtl"] .task-list-label {
 	margin-left: 0;

@@ -3,9 +3,38 @@ import { Direction, detectDirection } from "globals";
 
 let lastDetectedDir: Direction = 'ltr';
 
+/*
+ * This recursively breaks multi-line <p> elements into multiple DIVs, to enable the post-processor to set
+ * a different text direction to each such line.
+ */
+function breaksToDivs(el: HTMLElement) {
+	if (!el) return;
+	if (el.tagName == 'P') {
+		const splitText = el.innerHTML.split('<br>');
+		if (splitText.length > 1) {
+			let newInnerHtml = '';
+			splitText.map((line) => { newInnerHtml += `<div class="esm-split">${line}</div>\n`; });
+			el.innerHTML = newInnerHtml;
+		}
+	}
+	if (el.children && el.children.length > 0) {
+		for (let i = 0; i < el.children.length; i++)
+			breaksToDivs(el.children[i] as HTMLElement);
+	}
+}
+
+/*
+ * This Markdown post-processor handles the Reading view and other rendered components of notes.
+ * It detects the direction for each node individually and adds corresponding CSS classes that are
+ * later referenced in styles.css.
+ */
 export const autoDirectionPostProcessor = (el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
 	let shouldAddDir = false, addedDir = false;
 	const childNodes = [];
+
+	// Obsidian renders adjacent lines as one <p> element with <br> breaks. Since these cannot
+	// be set a direction individually, the following breaks them into individual divs.
+	breaksToDivs(el);
 
 	for (let i = 0; i < el.childNodes.length; i++) {
 		const n = el.childNodes[i];
@@ -30,7 +59,7 @@ export const autoDirectionPostProcessor = (el: HTMLElement, ctx: MarkdownPostPro
 
 		childNodes.push(n);
 
-		if (i === el.childNodes.length-1 && shouldAddDir && !addedDir) {
+		if (i === el.childNodes.length - 1 && shouldAddDir && !addedDir) {
 			el.addClass(dirClass(lastDetectedDir));
 		}
 	}

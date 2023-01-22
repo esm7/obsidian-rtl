@@ -4,35 +4,31 @@ import { autoDirectionPostProcessor } from './AutoDirPostProcessor';
 import { EditorView } from '@codemirror/view';
 import { Direction, RTL_CLASS, AUTO_CLASS } from 'globals';
 
-class Settings {
-	public fileDirections: { [path: string]: Direction } = {};
-	public defaultDirection: Direction = 'ltr';
-	public rememberPerFile: boolean = true;
-	public setNoteTitleDirection: boolean = true;
-	public setYamlDirection: boolean = false;
-	public statusBar: boolean = true;
+export type Settings = {
+	fileDirections: { [path: string]: Direction };
+	defaultDirection: Direction;
+	rememberPerFile: boolean;
+	setNoteTitleDirection: boolean;
+	setYamlDirection: boolean;
+	statusBar: boolean;
+};
 
-	toJson() {
-		return JSON.stringify(this);
-	}
-
-	fromJson(content: string) {
-		var obj = JSON.parse(content);
-		this.fileDirections = obj['fileDirections'];
-		this.defaultDirection = obj['defaultDirection'];
-		this.rememberPerFile = obj['rememberPerFile'];
-		this.setNoteTitleDirection = obj['setNoteTitleDirection'];
-	}
-}
+const DEFAULT_SETTINGS: Settings = {
+	fileDirections: {},
+	defaultDirection: 'ltr',
+	rememberPerFile: true,
+	setNoteTitleDirection: true,
+	setYamlDirection: false,
+	statusBar: true
+};
 
 export default class RtlPlugin extends Plugin {
-	public settings = new Settings();
+	public settings: Settings = null;
 	private currentFile: TFile;
-	public SETTINGS_PATH = '.obsidian/rtl.json'
 	private initialized = false;
 	private statusBarItem: HTMLElement = null;
 
-	onload() {
+	async onload() {
 		this.addCommand({
 			id: 'switch-text-direction',
 			name: 'Switch Text Direction (LTR->RTL->auto)',
@@ -43,9 +39,10 @@ export default class RtlPlugin extends Plugin {
 		this.registerEditorExtension(EditorView.perLineTextDirection.of(true));
 		this.registerMarkdownPostProcessor(autoDirectionPostProcessor);
 
-		this.addSettingTab(new RtlSettingsTab(this.app, this));
+		await this.convertLegacySettings();
+		await this.loadSettings();
 
-		this.loadSettings();
+		this.addSettingTab(new RtlSettingsTab(this.app, this));
 
 		this.app.workspace.on('active-leaf-change', async (leaf: WorkspaceLeaf) => {
 			if (leaf.view instanceof MarkdownView) {
@@ -86,16 +83,15 @@ export default class RtlPlugin extends Plugin {
 	}
 
 	onunload() {
-		// TODO unload
-		// const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-		// if (view && view?.editor) {
-		// 	// @ts-expect-error, not typed
-		// 	const editorView = view.editor.cm as EditorView;
-		// 	const plugin = editorView.plugin(autoDirectionPlugin);
-		// 	if (plugin) {
-		// 		plugin.setActive(false, editorView);
-		// 	}
-		// }
+		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (view && view?.editor) {
+			// @ts-expect-error, not typed
+			const editorView = view.editor.cm as EditorView;
+			const plugin = editorView.plugin(autoDirectionPlugin);
+			if (plugin) {
+				plugin.setActive(false, editorView);
+			}
+		}
 
 		console.log('unloading RTL plugin');
 	}
@@ -133,15 +129,29 @@ export default class RtlPlugin extends Plugin {
 		}
 	}
 
-	saveSettings() {
-		var settings = this.settings.toJson();
-		this.app.vault.adapter.write(this.SETTINGS_PATH, settings);
+	async saveSettings() {
+        await this.saveData(this.settings);
 	}
 
-	loadSettings() {
-		this.app.vault.adapter.read(this.SETTINGS_PATH).
-			then((content) => this.settings.fromJson(content)).
-			catch(error => { console.log("RTL settings file not found"); });
+	async loadSettings() {
+		this.settings = Object.assign(
+			{},
+			DEFAULT_SETTINGS,
+			await this.loadData()
+		);
+	}
+
+	async convertLegacySettings() {
+		const legacySettingsPath = '.obsidian/rtl.json';
+		if (await this.app.vault.adapter.exists(legacySettingsPath)) {
+			const legacyContent = await this.app.vault.adapter.read(legacySettingsPath);
+			if (legacyContent) {
+				this.settings = JSON.parse(legacyContent);
+			}
+			this.app.vault.adapter.remove(legacySettingsPath);
+			new Notice('RTL Plugin: legacy settings were converted to the new format');
+			this.saveSettings();
+		}
 	}
 
 	setStatusBar(direction: Direction, usedDefault: boolean) {
@@ -221,7 +231,7 @@ export default class RtlPlugin extends Plugin {
 		// Although Obsidian doesn't care about is-rtl in Markdown preview, we use it below for some more formatting
 		this.addDirectionClassToEl(readingDiv, newDirection);
 		readingDiv.classList.remove('rtl-yaml');
-		if (newDirection !== 'auto')
+		if (newDirection !== 'auto' && this.settings.setYamlDirection)
 			readingDiv.classList.add('rtl-yaml');
 	}
 
