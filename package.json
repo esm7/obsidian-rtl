@@ -4,21 +4,24 @@
   "description": "RTL (Right to Left) language support for Obsidian.",
   "main": "main.js",
   "scripts": {
-    "dev": "rollup --config rollup.config.js -w",
-    "build": "rollup --config rollup.config.js"
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "version": "node version-bump.mjs && git add manifest.json versions.json"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^15.1.0",
-    "@rollup/plugin-node-resolve": "^9.0.0",
-    "@rollup/plugin-typescript": "^6.1.0",
-    "@types/node": "^14.14.2",
-    "codemirror": "^5.62.0",
-    "obsidian": "https://github.com/obsidianmd/obsidian-api/tarball/master",
-    "rollup": "^2.33.0",
-    "tslib": "^2.0.3",
-    "typescript": "^4.0.5"
+    "@codemirror/view": "^6.7.3",
+    "@types/node": "^16.11.6",
+    "@typescript-eslint/eslint-plugin": "5.29.0",
+    "@typescript-eslint/parser": "5.29.0",
+    "builtin-modules": "3.3.0",
+    "codemirror": "^6.0.1",
+    "esbuild": "0.14.47",
+    "obsidian": "latest",
+    "prettier": "^2.7.1",
+    "tslib": "2.4.0",
+    "typescript": "4.7.4"
   }
 }
