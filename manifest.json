@@ -3,7 +3,7 @@
   "name": "RTL Support",
   "version": "0.3.0",
   "minAppVersion": "0.15.3",
-  "description": "Right to Left (RTL) text direction support for languages like Arabic, Hebrew and Farsi.",
+  "description": "Right to Left (RTL) text direction support for languages like Arabic, Hebrew and Persian (Farsi).",
   "author": "esm",
   "authorUrl": "",
   "isDesktopOnly": false
