@@ -5,7 +5,7 @@
 This plugin adds configurable RTL support for [Obsidian](https://obsidian.md).
 
 It relies on the RTL support of [CodeMirror](https://codemirror.net/doc/manual.html), which is the editor component that Obsidian uses, and contains lots of custom code on top of it to provide a smooth experience within Obsidian.
-You can set a global direction per file (LTR/RTL) or use Auto which decides on each line individually based on the first strongly indicative character.
+You can set a global direction per file (LTR/RTL) or use Auto which decides on each line individually based on the first strongly-directional character.
 
 This is the real deal: Arabic, Hebrew and Persian (Farsi) can be combined with LTR languages freely and render just as you'd expect.
 

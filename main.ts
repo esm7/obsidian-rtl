@@ -1,4 +1,4 @@
-import { Notice, App, WorkspaceLeaf, MarkdownView, Plugin, PluginSettingTab, TFile, TAbstractFile, Setting } from 'obsidian';
+import { Notice, App, WorkspaceLeaf, MarkdownView, Plugin, PluginSettingTab, TFile, TAbstractFile, Setting, getIcon } from 'obsidian';
 import { autoDirectionPlugin } from './AutoDirPlugin';
 import { autoDirectionPostProcessor } from './AutoDirPostProcessor';
 import { EditorView } from '@codemirror/view';
@@ -27,11 +27,13 @@ export default class RtlPlugin extends Plugin {
 	private currentFile: TFile;
 	private initialized = false;
 	private statusBarItem: HTMLElement = null;
+	private statusBarText: HTMLElement = null;
 
 	async onload() {
 		this.addCommand({
 			id: 'switch-text-direction',
 			name: 'Switch Text Direction (LTR->RTL->auto)',
+			icon: 'arrow-left-right',
 			callback: () => { this.switchDocumentDirection(); }
 		});
 
@@ -71,6 +73,10 @@ export default class RtlPlugin extends Plugin {
 		}));
 
 		this.statusBarItem = this.addStatusBarItem();
+		const languageIcon = getIcon('arrow-left-right');
+		this.statusBarItem.appendChild(languageIcon);
+		this.statusBarText = this.statusBarItem.createEl('span');
+		this.statusBarText.style.marginLeft = '5px';
 		this.statusBarItem.title = 'Text direction';
 		this.statusBarItem.addClass('mod-clickable');
 		this.statusBarItem.addEventListener('click', _ev => {
@@ -166,11 +172,10 @@ export default class RtlPlugin extends Plugin {
 				else
 					statusString = directionString;
 			}
-			this.statusBarItem.textContent = statusString;
+			this.statusBarText.textContent = statusString;
 			this.statusBarItem.style.display = null;
 		} else {
 			this.statusBarItem.style.display = 'none';
-			this.statusBarItem.textContent = '';
 		}
 	}
 
@@ -285,18 +290,22 @@ export default class RtlPlugin extends Plugin {
 
 	switchDocumentDirection() {
 		let newDirection = this.getDocumentDirection();
+		let displayName = '';
 		switch (newDirection) {
 			case 'ltr':
 				newDirection = 'rtl';
+				displayName = 'RTL';
 				break;
 			case 'rtl':
 				newDirection = 'auto';
+				displayName = 'Auto';
 				break;
 			case 'auto':
 				newDirection = 'ltr';
+				displayName = 'LTR';
 				break;
 		}
-		new Notice(`Document direction set to ${newDirection}`, 500);
+		new Notice(`Document direction set to ${displayName}`, 2000);
 
 		this.setDocumentDirection(newDirection, false);
 		if (this.settings.rememberPerFile && this.currentFile && this.currentFile.path) {
