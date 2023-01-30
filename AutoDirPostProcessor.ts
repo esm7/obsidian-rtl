@@ -3,6 +3,10 @@ import { Direction, detectDirection } from "globals";
 
 let lastDetectedDir: Direction = 'ltr';
 
+// Special nodes are which the direction style should get applied on the parent
+// element, Because changing their own direction won't take effect.
+const specialNodes = ['A', 'STRONG', 'EM', 'DEL', 'CODE']
+
 /*
  * This recursively breaks multi-line <p> elements into multiple DIVs, to enable the post-processor to set
  * a different text direction to each such line.
@@ -43,12 +47,12 @@ export const autoDirectionPostProcessor = (el: HTMLElement, ctx: MarkdownPostPro
 			if (dir) {
 				addedDir = true;
 				lastDetectedDir = dir;
-				if (el.nodeName === 'A' && el.parentElement) {
-					el.parentElement.addClass(dirClass(dir));
+				if (specialNodes.contains(el.nodeName) && el.parentElement) {
+					addDirClassIfNotAddedBefore(el.parentElement, dirClass(dir));
 				} else {
 					el.addClass(dirClass(dir));
 					if (el.parentElement && el.parentElement.nodeName === 'LI') {
-						el.parentElement.addClass(dirClass(dir));
+						addDirClassIfNotAddedBefore(el.parentElement, dirClass(dir));
 					}
 				}
 			}
@@ -82,4 +86,12 @@ function dirClass(dir: Direction): string {
 	} else {
 		return 'esm-ltr';
 	}
+}
+
+function addDirClassIfNotAddedBefore(el: HTMLElement, cls: string) {
+	if (el.hasClass('esm-rtl') || el.hasClass('esm-ltr')) {
+		return;
+	}
+
+	el.addClass(cls);
 }
