@@ -73,17 +73,11 @@
 	margin-right: -3px;
 }
 
+/* Better spacing between bullet and text */
 .outliner-plugin-better-bullets .markdown-source-view.is-rtl .cm-formatting-list-ul,
 .outliner-plugin-better-bullets .markdown-source-view .cm-line[dir="rtl"] .cm-formatting-list-ul {
 	margin-right: 0;
 	margin-left: 0.3em;
-}
-
-.markdown-source-view.is-rtl .HyperMD-header .collapse-indicator,
-.markdown-source-view .HyperMD-header.cm-line[dir="rtl"] .collapse-indicator {
-	padding-right: 0;
-	padding-left: 6px;
-	right: -16px;
 }
 
 .markdown-source-view.is-rtl .is-collapsed .collapse-indicator svg.svg-icon,
@@ -91,6 +85,7 @@
 	transform: rotate(90deg);
 }
 
+/* Styling for collapse indicator on the headings */
 .markdown-source-view.is-rtl .cm-line .cm-fold-indicator .collapse-indicator,
 .markdown-source-view .cm-line[dir="rtl"] .cm-fold-indicator .collapse-indicator {
 	padding-right: 0;
@@ -98,6 +93,7 @@
 	right: -16px;
 }
 
+/* Styling for collapse indicator on the lists */
 .markdown-source-view.is-rtl .cm-line:not(.cm-active):not(.HyperMD-header):not(.HyperMD-task-line) .cm-fold-indicator .collapse-indicator,
 .markdown-source-view .cm-line[dir="rtl"]:not(.cm-active):not(.HyperMD-header):not(.HyperMD-task-line) .cm-fold-indicator .collapse-indicator {
 	padding-right: 0;
@@ -110,45 +106,54 @@
 	text-align: right;
 }
 
+/* Moving bullets to right side of the page and adding enough space between the bullet and the text */
 .markdown-preview-view.is-auto .esm-rtl > .list-bullet,
 .markdown-preview-view.is-rtl .list-bullet {
 	float: right;
 	margin-right: -12px;
 }
 
+/* Fixing indentation guides in nested lists */
 .markdown-preview-view.is-auto.show-indentation-guide li.esm-rtl > ul::before,
 .markdown-preview-view.is-auto.show-indentation-guide li.esm-rtl > ol::before {
 	left: auto;
 	right: -15px;
 }
 
+/* Moving the collapse indicator to right side of the page */
 .markdown-preview-view.is-auto .esm-rtl > .collapse-indicator,
 .markdown-preview-view.is-rtl .collapse-indicator {
 	float: right;
 }
 
+/* Moving the collapse indicator icon on the right of the text with enough space between */
 .markdown-preview-view.is-auto .esm-rtl > .list-collapse-indicator,
 .markdown-preview-view.is-rtl .list-collapse-indicator {
 	margin-right: -48px;
 	padding-left: 18px;
 }
 
+/* Moving the heading collapse indicator on the right of the text. Without
+This the collapse indicator will be over the heading text */
 .markdown-preview-view.is-auto .esm-rtl > .heading-collapse-indicator,
 .markdown-preview-view.is-rtl .heading-collapse-indicator {
 	margin-right: -22px;
 }
 
+/* Mirroring collapse icon for nested lists so it points to rtl text not outside of page */
 .markdown-preview-view.is-auto .esm-rtl > .collapse-icon .is-collapsed svg.svg-icon,
 .markdown-preview-view.is-auto .esm-rtl.is-collapsed > .collapse-icon svg.svg-icon,
 .markdown-preview-view.is-rtl .collapse-icon .is-collapsed svg.svg-icon {
 	transform: rotate(90deg);
 }
 
+/* Mirroring collapse icon for headings so it points to rtl text not outside of page */
 .markdown-preview-view .is-collapsed .esm-rtl > .collapse-icon svg.svg-icon,
 .markdown-preview-view.is-rtl .collapse-icon svg.svg-icon {
 	transform: rotate(90deg);
 }
 
+/* Reverting the margin so the text won't stick to the checkbox */
 .markdown-preview-view.is-auto .esm-rtl > .task-list-item-checkbox,
 .markdown-preview-view.is-rtl .task-list-item-checkbox {
 	margin-left: 6px;
