@@ -21,6 +21,16 @@ When enabled, you will have a "Switch Text Direction" command (accessible via Ct
 
 Alternatively, you should see a text direction status bar item that will toggle the document direction when clicked.
 
+## Canvas Support
+
+The plugin provides full direction support in the Canvas core plugin, with the following caveats:
+
+- A canvas card of an existing note gets the direction set for the note (or the default direction).
+  - To change a card's direction you'd need to open the corresponding note, change its direction and reopen the canvas.
+  - This might be improved in future versions if many users ask for it.
+- A canvas card with no associated file will always be with the default direction (LTR/RTL/Auto) and there's no way to change that.
+  - Hopefully future versions of Obsidian will provide a full API for Canvas which will allow saving metadata for a card without a note.
+
 ## Support the Development
 
 If you want to support the development of this plugin, please consider to [buy me a coffee](https://www.buymeacoffee.com/esm7).
@@ -68,6 +78,16 @@ It is possible to temporarily override a note's direction regardless of the fron
 
 
 ## Changelog
+
+### 1.1.0
+
+**Added full support for RTL, LTR and Auto direction in Canvas**. See [here](#canvas-support) for more details.
+
+This required major changes to how the plugin works, and although I tried to test it extensively, I won't be surprised if some bugs crept in.
+Please report any issues!
+
+**Bug fixes:**
+- Issues related to special tags (https://github.com/esm7/obsidian-rtl/pull/53), thanks #zoli!
 
 ### 1.0.0
 

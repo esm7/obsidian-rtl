@@ -27,14 +27,33 @@ function breaksToDivs(el: HTMLElement) {
 	}
 }
 
+// Try to detect if the postprocessor was asked to run inside a canvas element, and in that case, use the
+// supplied setPreviewDirection function to launch the plugin logic and set the text to the file's direction.
+function detectCanvasElement(el: HTMLElement, ctx: MarkdownPostProcessorContext, setPreviewDirection: SetPreviewDirection) {
+	const container = (ctx as any).containerEl as HTMLElement;
+	if (container && container.closest) {
+		const possibleCanvas = container.closest('.canvas-node-content');
+		if (possibleCanvas) {
+			const markdownPreview = container.closest('.markdown-preview-view');
+			if (markdownPreview && markdownPreview instanceof HTMLDivElement) {
+				// Mark this canvas as RTL or LTR
+				setPreviewDirection(ctx.sourcePath, markdownPreview);
+			}
+		}
+	}
+}
+
+type SetPreviewDirection = (path: string, markdownPreviewElement: HTMLDivElement) => void;
+
 /*
  * This Markdown post-processor handles the Reading view and other rendered components of notes.
  * It detects the direction for each node individually and adds corresponding CSS classes that are
  * later referenced in styles.css.
  */
-export const autoDirectionPostProcessor = (el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
+export const autoDirectionPostProcessor = (el: HTMLElement, ctx: MarkdownPostProcessorContext, setPreviewDirection: SetPreviewDirection) => {
 	let shouldAddDir = false, addedDir = false;
 	const childNodes = [];
+	detectCanvasElement(el, ctx, setPreviewDirection);
 
 	// Obsidian renders adjacent lines as one <p> element with <br> breaks. Since these cannot
 	// be set a direction individually, the following breaks them into individual divs.
@@ -69,7 +88,7 @@ export const autoDirectionPostProcessor = (el: HTMLElement, ctx: MarkdownPostPro
 	}
 
 	for (let i = 0; i < childNodes.length; i++) {
-		autoDirectionPostProcessor(childNodes[i] as HTMLElement, ctx);
+		autoDirectionPostProcessor(childNodes[i] as HTMLElement, ctx, setPreviewDirection);
 	}
 
 	if (el.nodeName === "UL") {

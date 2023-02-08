@@ -164,3 +164,13 @@ This the collapse indicator will be over the heading text */
 	direction: ltr;
 	text-align-last: left;
 }
+
+/* Helper styles for debugging */
+/* .cm-line[dir="rtl"] { */
+/*     border-right: dashed; */
+/*     border-right-color: blue; */
+/* } */
+/* .cm-line[dir="ltr"] { */
+/*     border-right: dashed; */
+/*     border-right-color: red; */
+/* } */
