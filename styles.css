@@ -101,7 +101,33 @@
 	right: -16px;
 }
 
-.markdown-preview-view.is-auto .esm-rtl, .kanban-plugin__board .esm-rtl {
+/* Styling for tags in rtl */
+.markdown-source-view.is-rtl .cm-line .cm-hashtag.cm-hashtag-begin,
+.markdown-source-view .cm-line[dir="rtl"] .cm-hashtag.cm-hashtag-begin {
+	border-top-right-radius: var(--tag-radius);
+	border-bottom-right-radius: var(--tag-radius);
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	border-left: none;
+	border-right: var(--tag-border-width) solid var(--tag-border-color);
+	padding-right: var(--tag-padding-x);
+	padding-left: 0;
+}
+.markdown-source-view.is-rtl .cm-line .cm-hashtag.cm-hashtag-end,
+.markdown-source-view .cm-line[dir="rtl"] .cm-hashtag.cm-hashtag-end {
+	border-top-left-radius: var(--tag-radius);
+	border-bottom-left-radius: var(--tag-radius);
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	border-right: none;
+	border-left: var(--tag-border-width) solid var(--tag-border-color);
+	padding-left: var(--tag-padding-x);
+	padding-right: 0;
+}
+
+.markdown-preview-view.is-auto .esm-rtl,
+.kanban-plugin__board .esm-rtl,
+.kanban-plugin__drag-container .esm-rtl {
 	direction: rtl;
 	text-align: right;
 }
