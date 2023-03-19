@@ -7,7 +7,7 @@ This plugin adds configurable RTL support for [Obsidian](https://obsidian.md).
 It relies on the RTL support of [CodeMirror](https://codemirror.net/doc/manual.html), which is the editor component that Obsidian uses, and contains lots of custom code on top of it to provide a smooth experience within Obsidian.
 You can set a global direction per file (LTR/RTL) or use Auto which decides on each line individually based on the first strongly-directional character.
 
-This is the real deal: Arabic, Hebrew and Persian (Farsi) can be combined with LTR languages freely and render just as you'd expect.
+This is the real deal: Arabic, Hebrew, Persian (Farsi), Syriac and Thaana can be combined with LTR languages freely and render just as you'd expect.
 
 To my best knowledge, this is the most comprehensive RTL support any Markdown editor currently has to offer.
 Many editors offer RTL support as a global setting rather than a per-document setting -- while this plugin supports both a per-document global LTR/RTL setting and an Auto mode that can mix many directions in the same note.
@@ -78,6 +78,13 @@ It is possible to temporarily override a note's direction regardless of the fron
 
 
 ## Changelog
+
+### 1.1.1
+
+**Bug fixes:**
+
+- Fix to tags in RTL mode (https://github.com/esm7/obsidian-rtl/issues/54), thanks @zoli!
+- Added proper support for Syriac and Thaana as RTL languages (https://github.com/esm7/obsidian-rtl/issues/56).
 
 ### 1.1.0
 

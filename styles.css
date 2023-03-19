@@ -101,7 +101,7 @@
 	right: -16px;
 }
 
-/* Styling for tags in rtl */
+/* Styling for tags in RTL */
 .markdown-source-view.is-rtl .cm-line .cm-hashtag.cm-hashtag-begin,
 .markdown-source-view .cm-line[dir="rtl"] .cm-hashtag.cm-hashtag-begin {
 	border-top-right-radius: var(--tag-radius);
