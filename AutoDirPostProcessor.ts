@@ -17,7 +17,7 @@ function breaksToDivs(el: HTMLElement) {
 		const splitText = el.innerHTML.split('<br>');
 		if (splitText.length > 1) {
 			let newInnerHtml = '';
-			splitText.map((line) => { newInnerHtml += `<div class="esm-split">${line}</div>\n`; });
+			splitText.map((line) => { newInnerHtml += `<div class="esm-split">${line}</div>`; });
 			el.innerHTML = newInnerHtml;
 		}
 	}
@@ -52,7 +52,6 @@ type SetPreviewDirection = (path: string, markdownPreviewElement: HTMLDivElement
  */
 export const autoDirectionPostProcessor = (el: HTMLElement, ctx: MarkdownPostProcessorContext, setPreviewDirection: SetPreviewDirection) => {
 	let shouldAddDir = false, addedDir = false;
-	const childNodes = [];
 	detectCanvasElement(el, ctx, setPreviewDirection);
 
 	// Obsidian renders adjacent lines as one <p> element with <br> breaks. Since these cannot
@@ -67,9 +66,12 @@ export const autoDirectionPostProcessor = (el: HTMLElement, ctx: MarkdownPostPro
 				addedDir = true;
 				lastDetectedDir = dir;
 				if (specialNodes.contains(el.nodeName) && el.parentElement) {
-					addDirClassIfNotAddedBefore(el.parentElement, dirClass(dir));
+					let target = nonSpecialParent(el.parentElement);
+					if (target != null) {
+						addDirClassIfNotAddedBefore(target, dirClass(dir));
+					}
 				} else {
-					el.addClass(dirClass(dir));
+					addDirClassIfNotAddedBefore(el, dirClass(dir));
 					if (el.parentElement && el.parentElement.nodeName === 'LI') {
 						addDirClassIfNotAddedBefore(el.parentElement, dirClass(dir));
 					}
@@ -80,15 +82,11 @@ export const autoDirectionPostProcessor = (el: HTMLElement, ctx: MarkdownPostPro
 			continue;
 		}
 
-		childNodes.push(n);
+		autoDirectionPostProcessor(n as HTMLElement, ctx, setPreviewDirection);
 
 		if (i === el.childNodes.length - 1 && shouldAddDir && !addedDir) {
 			el.addClass(dirClass(lastDetectedDir));
 		}
-	}
-
-	for (let i = 0; i < childNodes.length; i++) {
-		autoDirectionPostProcessor(childNodes[i] as HTMLElement, ctx, setPreviewDirection);
 	}
 
 	if (el.nodeName === "UL") {
@@ -113,4 +111,12 @@ function addDirClassIfNotAddedBefore(el: HTMLElement, cls: string) {
 	}
 
 	el.addClass(cls);
+}
+
+function nonSpecialParent(el: HTMLElement) {
+	while (specialNodes.contains(el.nodeName)) {
+		el = el.parentElement;
+	}
+
+	return el;
 }
