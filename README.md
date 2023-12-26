@@ -79,6 +79,13 @@ It is possible to temporarily override a note's direction regardless of the fron
 
 ## Changelog
 
+### 1.1.2
+
+**Bug fixes:**
+
+- Fix required for Obsidian 1.5 (no support for tables yet though -- it's just a fix for the plugin to continue functioning properly).
+- Fixed problem when paragraph breaks to divs (https://github.com/esm7/obsidian-rtl/pull/59) -- thanks @zoli and sorry @Wnb369 for the huge delay in merging this :(
+
 ### 1.1.1
 
 **Bug fixes:**
