@@ -47,7 +47,9 @@ export function getAutoDirectionPlugin(rtlPlugin: RtlPlugin) {
 				this.rtlPlugin = rtlPlugin;
 				this.view = view;
 				const editorInfo = this.view.state.field(editorInfoField);
-				if (editorInfo instanceof MarkdownView) {
+				// Checking for editorInfo.editMode because apparently editorInfo.editor which is needed later
+				// is a getter which counts on this field to exist
+				if (editorInfo && editorInfo instanceof MarkdownView && (editorInfo as any).editMode) {
 					this.rtlPlugin.adjustDirectionToView(editorInfo, this);
 				}
 				this.rtlPlugin.handleIframeEditor(this.view.dom, this.view, editorInfo.file, this);
