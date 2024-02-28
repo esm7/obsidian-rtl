@@ -193,14 +193,25 @@ This the collapse indicator will be over the heading text */
 	text-align-last: left;
 }
 
-/* If table first header is rtl render table on the right side of page but dont
-* make every cell rtl*/
-.cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper.esm-rtl), 
-.cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper .cm-line[dir="rtl"]) {
+/* If the table first header cell is RTL render the table on the right side of page but dont make every cell RTL */
+.is-auto .cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper.esm-rtl), 
+.is-auto .cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper .cm-line[dir="rtl"]) {
 	direction: rtl;
 }
-.cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper.esm-rtl) .table-wrapper, 
-.cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper .cm-line[dir="rtl"]) .table-wrapper {
+.is-auto .cm-table-widget .table-cell-wrapper.esm-ltr {
+	direction: ltr;
+}
+.is-auto .cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper.esm-rtl) .table-col-btn {
+	left: -16px;
+	border-left: inherit;
+	cursor: w-resize;
+}
+
+/* Similarly to the above, decide on the table direction for Reading View based on the first header cell */
+.markdown-preview-view.is-auto div:has(table thead tr:first-of-type th:first-of-type.esm-rtl) {
+	direction: rtl;
+}
+.markdown-preview-view.is-auto div:has(table thead tr:first-of-type th:first-of-type.esm-ltr) {
 	direction: ltr;
 }
 

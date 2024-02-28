@@ -13,7 +13,7 @@ export type Settings = {
 
 export const DEFAULT_SETTINGS: Settings = {
 	fileDirections: {},
-	defaultDirection: 'ltr',
+	defaultDirection: 'auto',
 	rememberPerFile: true,
 	setNoteTitleDirection: true,
 	setYamlDirection: false,

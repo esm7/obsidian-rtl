@@ -40,7 +40,7 @@ If you want to support the development of this plugin, please consider to [buy m
 Version 1.0.0 of this plugin introduced an "auto" mode that detects the direction of each line individually and enables mixed LTR/RTL in the same note.
 This mechanism is based on the "per line text direction" support for CodeMirror that was added a few months earlier, but it tweaks it extensively in order to reach the best user experience that we could (and thanks @zoli for being the first to figure out how to utilize this in an editor plugin!)
 
-As of January 2023 when this is introduced, this feature should be regarded as experimental; it may not work perfectly in 100% of the cases.
+For tables, the direction of the table is decided based on the first cell of the table (left-most cell of the header for an LTR table or the right-most one for an RTL table).
 
 ## Settings
 
@@ -78,6 +78,14 @@ It is possible to temporarily override a note's direction regardless of the fron
 
 
 ## Changelog
+
+### 1.2.0
+
+- Auto direction is now the default for new users installing the plugin.
+- Decent support for tables, thanks to the incredible @zoli:
+    - Tables now properly obey to the document direction.
+    - In auto direction, the table direction is decided based on the first cell of the table.
+    - Mixed LTR-RTL tables are supported, but due to Obsidian's current cursor movement implementation, moving between cells with different directions using the keyboard arrows isn't great.
 
 ### 1.1.2
 
