@@ -106,11 +106,10 @@ function dirClass(dir: Direction): string {
 }
 
 function addDirClassIfNotAddedBefore(el: HTMLElement, cls: string) {
-	if (el.hasClass('esm-rtl') || el.hasClass('esm-ltr')) {
-		return;
+	if (!el.hasClass(cls)) {
+		el.removeClass('esm-rtl', 'esm-ltr');
+		el.addClass(cls);
 	}
-
-	el.addClass(cls);
 }
 
 function nonSpecialParent(el: HTMLElement) {

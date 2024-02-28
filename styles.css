@@ -16,7 +16,8 @@
 }
 
 /* List indent fix */
-.is-mobile .is-rtl .HyperMD-list-line, .is-mobile .HyperMD-list-line[dir="rtl"] {
+.is-mobile .is-rtl .HyperMD-list-line,
+.is-mobile .HyperMD-list-line[dir="rtl"] {
 	text-indent: 0px !important;
 	padding-left: 0 !important;
 }
@@ -127,7 +128,8 @@
 
 .markdown-preview-view.is-auto .esm-rtl,
 .kanban-plugin__board .esm-rtl,
-.kanban-plugin__drag-container .esm-rtl {
+.kanban-plugin__drag-container .esm-rtl,
+.markdown-source-view.is-auto .table-cell-wrapper.esm-rtl {
 	direction: rtl;
 	text-align: right;
 }
@@ -189,6 +191,17 @@ This the collapse indicator will be over the heading text */
 .markdown-preview-view.is-auto .esm-ltr {
 	direction: ltr;
 	text-align-last: left;
+}
+
+/* If table first header is rtl render table on the right side of page but dont
+* make every cell rtl*/
+.cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper.esm-rtl), 
+.cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper .cm-line[dir="rtl"]) {
+	direction: rtl;
+}
+.cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper.esm-rtl) .table-wrapper, 
+.cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper .cm-line[dir="rtl"]) .table-wrapper {
+	direction: ltr;
 }
 
 /* Helper styles for debugging */
