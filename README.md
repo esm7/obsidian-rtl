@@ -40,7 +40,7 @@ If you want to support the development of this plugin, please consider to [buy m
 Version 1.0.0 of this plugin introduced an "auto" mode that detects the direction of each line individually and enables mixed LTR/RTL in the same note.
 This mechanism is based on the "per line text direction" support for CodeMirror that was added a few months earlier, but it tweaks it extensively in order to reach the best user experience that we could (and thanks @zoli for being the first to figure out how to utilize this in an editor plugin!)
 
-For tables, the direction of the table is decided based on the first cell of the table (left-most cell of the header for an LTR table or the right-most one for an RTL table).
+For tables, the direction of the table in Auto mode is decided based on the first cell of the table (left-most cell of the header for an LTR table or the right-most one for an RTL table). In addition to that, each cell has its own direction that is decided based on its content.
 
 ## Settings
 
