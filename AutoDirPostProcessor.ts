@@ -43,6 +43,15 @@ function detectCanvasElement(el: HTMLElement, ctx: MarkdownPostProcessorContext,
 	}
 }
 
+// Try to detect if the postprocessor was asked to render an export, which seems to be the only case on which
+// the post processor is called with a top-level Markdown Preview View div.
+// In this case, we must add the relevant document direction class to that element, because no one else will.
+function detectExport(el: HTMLElement, ctx: MarkdownPostProcessorContext, setPreviewDirection: SetPreviewDirection) {
+	if (el?.classList && el.classList?.contains('markdown-preview-view')) {
+		setPreviewDirection(ctx.sourcePath, el as HTMLDivElement);
+	}
+}
+
 type SetPreviewDirection = (path: string, markdownPreviewElement: HTMLDivElement) => void;
 
 /*
@@ -50,9 +59,14 @@ type SetPreviewDirection = (path: string, markdownPreviewElement: HTMLDivElement
  * It detects the direction for each node individually and adds corresponding CSS classes that are
  * later referenced in styles.css.
  */
-export const autoDirectionPostProcessor = (el: HTMLElement, ctx: MarkdownPostProcessorContext, setPreviewDirection: SetPreviewDirection) => {
+export const autoDirectionPostProcessor = (
+	el: HTMLElement,
+	ctx: MarkdownPostProcessorContext,
+	setPreviewDirection: SetPreviewDirection,
+) => {
 	let shouldAddDir = false, addedDir = false;
 	detectCanvasElement(el, ctx, setPreviewDirection);
+	detectExport(el, ctx, setPreviewDirection);
 
 	// Obsidian renders adjacent lines as one <p> element with <br> breaks. Since these cannot
 	// be set a direction individually, the following breaks them into individual divs.

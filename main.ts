@@ -28,7 +28,7 @@ export default class RtlPlugin extends Plugin {
 		this.registerEditorExtension(this.autoDirectionPlugin);
 		this.registerEditorExtension(EditorView.perLineTextDirection.of(true));
 		this.registerMarkdownPostProcessor((el, ctx) => {
-			autoDirectionPostProcessor(el, ctx, (path, markdownPreviewElement) => this.setCanvasPreviewDirection(path, markdownPreviewElement));
+			autoDirectionPostProcessor(el, ctx, (path, markdownPreviewElement) => this.setPreviewDirectionByFileSettings(path, markdownPreviewElement));
 		});
 
 		await this.convertLegacySettings();
@@ -305,7 +305,11 @@ export default class RtlPlugin extends Plugin {
 			readingDiv.classList.add('rtl-yaml');
 	}
 
-	setCanvasPreviewDirection(path: string, markdownPreviewElement: HTMLDivElement) {
+	// This method checks what's the required file direction for the given path and assigns its direction
+	// classes accordingly.
+	// It is needed for canvas and exports, on which there is no other parent element that includes the 
+	// global direction of the document, e.g. the 'is-auto' class.
+	setPreviewDirectionByFileSettings(path: string, markdownPreviewElement: HTMLDivElement) {
 		const file = this.app.vault.getAbstractFileByPath(path);
 		const [requiredDirection, _] = this.getRequiredFileDirection(file);
 		this.setDocumentDirectionForReadingDiv(markdownPreviewElement, requiredDirection);

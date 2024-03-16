@@ -79,6 +79,10 @@ It is possible to temporarily override a note's direction regardless of the fron
 
 ## Changelog
 
+### 1.2.1
+
+- Fixed auto direction in PDF exports (https://github.com/esm7/obsidian-rtl/issues/74).
+
 ### 1.2.0
 
 - Auto direction is now the default for new users installing the plugin.
