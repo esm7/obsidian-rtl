@@ -1,5 +1,5 @@
 import { MarkdownPostProcessorContext } from 'obsidian';
-import { Direction, detectDirection } from './globals';
+import { Direction, detectDirection } from './direction.util';
 
 let lastDetectedDir: Direction = 'ltr';
 

@@ -18,3 +18,12 @@ export const detectDirection = (s: string): Direction | null => {
 
 	return null;
 }
+
+const NAMED_LINK_REGEX = /\[\[[^\]]*\|([^\]]*)\]\]/;
+
+// Replacing so we don't get the 'x' character which is used to show a checked checkbox in 
+// markdown as a LTR direction indicator.
+export const removeNoneMeaningfullText = (s: string): string => {
+	s = s.replace(NAMED_LINK_REGEX, '$1');
+	return s.replace('- [x]', '');
+}
