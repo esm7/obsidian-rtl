@@ -7,7 +7,7 @@ import {
 	ViewPlugin,
 } from "@codemirror/view";
 import { RangeSetBuilder, Text } from "@codemirror/state";
-import { detectDirection } from './globals';
+import { detectDirection, removeNoneMeaningfullText } from './direction.util';
 import RtlPlugin from './main';
 import { editorInfoField, MarkdownView } from 'obsidian';
 
@@ -174,9 +174,8 @@ export function getAutoDirectionPlugin(rtlPlugin: RtlPlugin) {
 			}
 
 			detectDecoration(s: string): Decoration | null {
-				// Replacing so we don't get the 'x' character which is used to show a checked checkbox in 
-				// markdown as a LTR direction indicator.
-				const direction = detectDirection(s.replace('- [x]', ''));
+				s = removeNoneMeaningfullText(s);
+				const direction = detectDirection(s);
 				switch (direction) {
 					case 'rtl':
 						return this.rtlDec;
@@ -217,3 +216,4 @@ export function getAutoDirectionPlugin(rtlPlugin: RtlPlugin) {
 			}
 		}, {decorations: (v) => v.decorations});
 }
+

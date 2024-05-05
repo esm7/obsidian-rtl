@@ -2,7 +2,7 @@ import { MarkdownFileInfo, Notice, WorkspaceLeaf, MarkdownView, Plugin, TFile, T
 import { getAutoDirectionPlugin, AutoDirectionPlugin } from './AutoDirPlugin';
 import { autoDirectionPostProcessor } from './AutoDirPostProcessor';
 import { EditorView, ViewPlugin } from '@codemirror/view';
-import { Direction, RTL_CLASS, AUTO_CLASS } from 'globals';
+import { Direction, RTL_CLASS, AUTO_CLASS } from 'direction.util';
 import { Settings, DEFAULT_SETTINGS, RtlSettingsTab } from 'settingsTab';
 
 export default class RtlPlugin extends Plugin {

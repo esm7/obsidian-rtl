@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import { Direction } from 'globals';
+import { Direction } from 'direction.util';
 import RtlPlugin from 'main';
 
 export type Settings = {
