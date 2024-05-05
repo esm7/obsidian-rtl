@@ -1,5 +1,5 @@
 import { MarkdownPostProcessorContext } from 'obsidian';
-import { Direction, detectDirection } from "globals";
+import { Direction, detectDirection } from './globals';
 
 let lastDetectedDir: Direction = 'ltr';
 
@@ -29,8 +29,8 @@ function breaksToDivs(el: HTMLElement) {
 
 // Try to detect if the postprocessor was asked to run inside a canvas element, and in that case, use the
 // supplied setPreviewDirection function to launch the plugin logic and set the text to the file's direction.
-function detectCanvasElement(el: HTMLElement, ctx: MarkdownPostProcessorContext, setPreviewDirection: SetPreviewDirection) {
-	const container = (ctx as any).containerEl as HTMLElement;
+function detectCanvasElement(ctx: MarkdownPostProcessorContext, setPreviewDirection: SetPreviewDirection) {
+	const container = ctx ? (ctx as any).containerEl as HTMLElement : null;
 	if (container && container.closest) {
 		const possibleCanvas = container.closest('.canvas-node-content');
 		if (possibleCanvas) {
@@ -65,8 +65,7 @@ export const autoDirectionPostProcessor = (
 	setPreviewDirection: SetPreviewDirection,
 ) => {
 	let shouldAddDir = false, addedDir = false;
-	detectCanvasElement(el, ctx, setPreviewDirection);
-	detectExport(el, ctx, setPreviewDirection);
+	detectCanvasElement(ctx, setPreviewDirection);
 
 	// Obsidian renders adjacent lines as one <p> element with <br> breaks. Since these cannot
 	// be set a direction individually, the following breaks them into individual divs.
@@ -79,15 +78,17 @@ export const autoDirectionPostProcessor = (
 			if (dir) {
 				addedDir = true;
 				lastDetectedDir = dir;
-				if (specialNodes.contains(el.nodeName) && el.parentElement) {
+				if (specialNodes.includes(el.nodeName) && el.parentElement) {
 					let target = nonSpecialParent(el.parentElement);
-					if (target != null) {
-						addDirClassIfNotAddedBefore(target, dirClass(dir));
+					if (target && 
+						/* If parent (target) has text with strong direction before this special node then don't change the parent direction */
+						!(target.childNodes.length !== 0 && target.childNodes[0].nodeValue && detectDirection(target.childNodes[0].nodeValue))) {
+						addDirClass(target, dirClass(dir));
 					}
 				} else {
-					addDirClassIfNotAddedBefore(el, dirClass(dir));
+					addDirClass(el, dirClass(dir));
 					if (el.parentElement && el.parentElement.nodeName === 'LI') {
-						addDirClassIfNotAddedBefore(el.parentElement, dirClass(dir));
+						addDirClass(el.parentElement, dirClass(dir));
 					}
 				}
 			}
@@ -99,14 +100,14 @@ export const autoDirectionPostProcessor = (
 		autoDirectionPostProcessor(n as HTMLElement, ctx, setPreviewDirection);
 
 		if (i === el.childNodes.length - 1 && shouldAddDir && !addedDir) {
-			el.addClass(dirClass(lastDetectedDir));
+			el.classList.add(dirClass(lastDetectedDir));
 		}
 	}
 
 	if (el.nodeName === "UL") {
 		const lis = el.querySelectorAll('li');
-		if (lis.length > 0 && lis[0].hasClass('esm-rtl')) {
-			el.addClass(dirClass('rtl'));
+		if (lis.length > 0 && lis[0].classList.contains('esm-rtl')) {
+			el.classList.add(dirClass('rtl'));
 		}
 	}
 }
@@ -119,15 +120,16 @@ function dirClass(dir: Direction): string {
 	}
 }
 
-function addDirClassIfNotAddedBefore(el: HTMLElement, cls: string) {
-	if (!el.hasClass(cls)) {
-		el.removeClass('esm-rtl', 'esm-ltr');
-		el.addClass(cls);
+function addDirClass(el: HTMLElement, cls: string) {
+	if (el.classList.contains(cls)) {
+		return;
 	}
+	el.classList.remove('esm-rtl', 'esm-ltr');
+	el.classList.add(cls);
 }
 
 function nonSpecialParent(el: HTMLElement) {
-	while (specialNodes.contains(el.nodeName)) {
+	while (specialNodes.includes(el.nodeName)) {
 		el = el.parentElement;
 	}
 

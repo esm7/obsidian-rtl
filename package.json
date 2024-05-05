@@ -6,21 +6,25 @@
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-    "version": "node version-bump.mjs && git add manifest.json versions.json"
+    "version": "node version-bump.mjs && git add manifest.json versions.json",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@codemirror/view": "^6.7.3",
+    "@jest/globals": "^29.7.0",
     "@types/node": "^16.11.6",
     "@typescript-eslint/eslint-plugin": "5.29.0",
     "@typescript-eslint/parser": "5.29.0",
     "builtin-modules": "3.3.0",
     "codemirror": "^6.0.1",
     "esbuild": "0.14.47",
+    "jest-environment-jsdom": "^29.7.0",
     "obsidian": "latest",
     "prettier": "^2.7.1",
+    "ts-jest": "^29.1.2",
     "tslib": "2.4.0",
     "typescript": "4.7.4"
   }
