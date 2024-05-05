@@ -12,6 +12,8 @@ This is the real deal: Arabic, Hebrew, Persian (Farsi), Syriac and Thaana can be
 To my best knowledge, this is the most comprehensive RTL support any Markdown editor currently has to offer.
 Many editors offer RTL support as a global setting rather than a per-document setting -- while this plugin supports both a per-document global LTR/RTL setting and an Auto mode that can mix many directions in the same note.
 
+**Important note:** as Obsidian is adding native auto direction support in version 1.6.0, the next versions of Obsidian RTL will remove a lot of plugin code and focus on improving some edges in Obsidian's native functionality. Therefore, from this point onward we will not work here on fixes and improvements that will soon be handled natively by Obsidian.
+
 ## Usage
 
 Install the plugin via Obsidian's "Third Party Plugins" pane.
@@ -78,6 +80,15 @@ It is possible to temporarily override a note's direction regardless of the fron
 
 
 ## Changelog
+
+### 1.2.2
+
+Thanks @zoli for everything in this release!
+
+**Important note:** as Obsidian is adding native auto direction support in version 1.6.0, the next major version of Obsidian RTL will remove a lot of plugin code and focus on improving some edges in Obsidian's native functionality. Therefore, this will be the last version to provide fixes/improvement that will soon be addressed natively in Obsidian.
+
+- Fixed messing up Persian sentences containing bold/italic/strikethrough English phrases (https://github.com/esm7/obsidian-rtl/issues/77)
+- Consider link name for detecting direction (https://github.com/esm7/obsidian-rtl/pull/80)
 
 ### 1.2.1
 
