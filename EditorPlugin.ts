@@ -6,7 +6,7 @@ import {
 	ViewUpdate,
 	ViewPlugin,
 } from "@codemirror/view";
-import { RangeSetBuilder, Text } from "@codemirror/state";
+import { RangeSetBuilder } from "@codemirror/state";
 import RtlPlugin from './main';
 import { editorInfoField, MarkdownView } from 'obsidian';
 import { Direction } from './direction.util';
