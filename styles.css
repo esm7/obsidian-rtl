@@ -1,219 +1,233 @@
 @media print {
-	span.cm-tab {
-		width: 50px !important;
-		display: inline-block;
-	}
+	/* span.cm-tab { */
+	/* 	width: 50px !important; */
+	/* 	display: inline-block; */
+	/* } */
 
-	.is-auto .esm-ltr {
-		direction: ltr;
-		text-align-last: left;
-	}
+	/* .is-ltr { */
+	/* 	direction: ltr; */
+	/* 	text-align-last: left; */
+	/* } */
 
-	.is-auto .esm-rtl {
-		direction: rtl;
-		text-align: right;
-	}
+	/* .is-rtl { */
+	/* 	direction: rtl; */
+	/* 	text-align: right; */
+	/* } */
 }
 
-/* List indent fix */
-.is-mobile .is-rtl .HyperMD-list-line,
-.is-mobile .HyperMD-list-line[dir="rtl"] {
-	text-indent: 0px !important;
-	padding-left: 0 !important;
-}
+/* /1* List indent fix *1/ */
+/* .is-mobile .is-rtl .HyperMD-list-line, */
+/* .is-mobile .HyperMD-list-line[dir="rtl"] { */
+/* 	text-indent: 0px !important; */
+/* 	padding-left: 0 !important; */
+/* } */
 
-.CodeMirror-rtl pre {
-	text-indent: 0px !important;
-}
+/* .CodeMirror-rtl pre { */
+/* 	text-indent: 0px !important; */
+/* } */
 
-/* Embedded links always LTR */
-.embedded-backlinks {
+/* /1* Embedded links always LTR *1/ */
+/* .embedded-backlinks { */
+/* 	direction: ltr; */
+/* } */
+
+/* /1* Patch YAML RTL *1/ */
+/* /1* In a preview that is strictly RTL (is-rtl) and the settings ask to right-aline YAML (rtl-yaml), set a YAML block to RTL. *1/ */
+/* .is-rtl.rtl-yaml code.language-yaml { */
+/* 	text-align: right; */
+/* } */
+/* /1* Then move the 'copy' button to the left *1/ */
+/* .is-rtl.rtl-yaml code.language-yaml + button.copy-code-button { */
+/* 	right: unset; */
+/* 	left: 0; */
+/* } */
+/* /1* In a preview that is auto (is-auto), and the YAML was detected as RTL (esm-rtl), set the 'copy' button to the left *1/ */
+/* .is-auto .esm-rtl.language-yaml + button.copy-code-button { */
+/* 	right: unset; */
+/* 	left: 0; */
+/* } */
+
+/* /1* In RTL, or in Auto with a first line that is RTL, set the flair (where it says e.g. 'yaml' in Edit mode) to the left *1/ */
+/* .is-rtl div:has(.HyperMD-codeblock-begin) .code-block-flair, */
+/* .is-auto div:has(.HyperMD-codeblock-begin + .HyperMD-codeblock[dir="rtl"]) .code-block-flair { */
+/* 	right: unset; */
+/* 	left: 6px; */
+/* } */
+
+.is-ltr div,
+.is-ltr li,
+.is-ltr p {
 	direction: ltr;
+	unicode-bidi: unset;
 }
 
-/* Patch YAML RTL */
-/* In a preview that is strictly RTL (is-rtl) and the settings ask to right-aline YAML (rtl-yaml), set a YAML block to RTL. */
-.is-rtl.rtl-yaml code.language-yaml {
-	text-align: right;
-}
-/* Then move the 'copy' button to the left */
-.is-rtl.rtl-yaml code.language-yaml + button.copy-code-button {
-	right: unset;
-	left: 0;
-}
-/* In a preview that is auto (is-auto), and the YAML was detected as RTL (esm-rtl), set the 'copy' button to the left */
-.is-auto .esm-rtl.language-yaml + button.copy-code-button {
-	right: unset;
-	left: 0;
-}
-
-/* In RTL, or in Auto with a first line that is RTL, set the flair (where it says e.g. 'yaml' in Edit mode) to the left */
-.is-rtl div:has(.HyperMD-codeblock-begin) .code-block-flair,
-.is-auto div:has(.HyperMD-codeblock-begin + .HyperMD-codeblock[dir="rtl"]) .code-block-flair {
-	right: unset;
-	left: 6px;
-}
-
-/* RTL and Auto callout titles that are detected as RTL - set to the right */
-.is-rtl .callout-title:has(.esm-rtl),
-.is-auto .callout-title:has(.esm-rtl) {
+.is-rtl div,
+.is-rtl li,
+.is-rtl p {
 	direction: rtl;
-}
-.is-auto .callout-content .esm-rtl {
-	direction: rtl;
-}
-/* When an RTL callout title was set to the right, left-justify its edit block button */
-.is-rtl div.cm-callout:has(.callout-title .esm-rtl) .edit-block-button,
-.is-auto div.cm-callout:has(.callout-title .esm-rtl) .edit-block-button {
-	right: unset;
-	left: var(--size-2-2);
+	unicode-bidi: unset;
 }
 
-.markdown-source-view .cm-line[dir="rtl"] .task-list-label {
-	margin-left: 0;
-	margin-right: -3px;
-}
+/* /1* RTL and Auto callout titles that are detected as RTL - set to the right *1/ */
+/* .is-rtl .callout-title:has(.esm-rtl), */
+/* .is-auto .callout-title:has(.esm-rtl) { */
+/* 	direction: rtl; */
+/* } */
+/* .is-auto .callout-content .esm-rtl { */
+/* 	direction: rtl; */
+/* } */
+/* /1* When an RTL callout title was set to the right, left-justify its edit block button *1/ */
+/* .is-rtl div.cm-callout:has(.callout-title .esm-rtl) .edit-block-button, */
+/* .is-auto div.cm-callout:has(.callout-title .esm-rtl) .edit-block-button { */
+/* 	right: unset; */
+/* 	left: var(--size-2-2); */
+/* } */
 
-/* Better spacing between bullet and text */
-.outliner-plugin-better-bullets .markdown-source-view.is-rtl .cm-formatting-list-ul,
-.outliner-plugin-better-bullets .markdown-source-view .cm-line[dir="rtl"] .cm-formatting-list-ul {
-	margin-right: 0;
-	margin-left: 0.3em;
-}
+/* .markdown-source-view .cm-line[dir="rtl"] .task-list-label { */
+/* 	margin-left: 0; */
+/* 	margin-right: -3px; */
+/* } */
 
-.markdown-source-view.is-rtl .is-collapsed .collapse-indicator svg.svg-icon,
-.markdown-source-view .cm-line[dir="rtl"] .is-collapsed .collapse-indicator svg.svg-icon {
-	transform: rotate(90deg);
-}
+/* /1* Better spacing between bullet and text *1/ */
+/* .outliner-plugin-better-bullets .markdown-source-view.is-rtl .cm-formatting-list-ul, */
+/* .outliner-plugin-better-bullets .markdown-source-view .cm-line[dir="rtl"] .cm-formatting-list-ul { */
+/* 	margin-right: 0; */
+/* 	margin-left: 0.3em; */
+/* } */
 
-/* Styling for collapse indicator on the headings */
-.markdown-source-view.is-rtl .cm-line .cm-fold-indicator .collapse-indicator,
-.markdown-source-view .cm-line[dir="rtl"] .cm-fold-indicator .collapse-indicator {
-	padding-right: 0;
-	padding-left: 6px;
-	right: -16px;
-}
+/* .markdown-source-view.is-rtl .is-collapsed .collapse-indicator svg.svg-icon, */
+/* .markdown-source-view .cm-line[dir="rtl"] .is-collapsed .collapse-indicator svg.svg-icon { */
+/* 	transform: rotate(90deg); */
+/* } */
 
-/* Styling for collapse indicator on the lists */
-.markdown-source-view.is-rtl .cm-line:not(.cm-active):not(.HyperMD-header):not(.HyperMD-task-line) .cm-fold-indicator .collapse-indicator,
-.markdown-source-view .cm-line[dir="rtl"]:not(.cm-active):not(.HyperMD-header):not(.HyperMD-task-line) .cm-fold-indicator .collapse-indicator {
-	padding-right: 0;
-	padding-left: 18px;
-	right: -16px;
-}
+/* /1* Styling for collapse indicator on the headings *1/ */
+/* .markdown-source-view.is-rtl .cm-line .cm-fold-indicator .collapse-indicator, */
+/* .markdown-source-view .cm-line[dir="rtl"] .cm-fold-indicator .collapse-indicator { */
+/* 	padding-right: 0; */
+/* 	padding-left: 6px; */
+/* 	right: -16px; */
+/* } */
 
-/* Styling for tags in RTL */
-.markdown-source-view.is-rtl .cm-line .cm-hashtag.cm-hashtag-begin,
-.markdown-source-view .cm-line[dir="rtl"] .cm-hashtag.cm-hashtag-begin {
-	border-top-right-radius: var(--tag-radius);
-	border-bottom-right-radius: var(--tag-radius);
-	border-top-left-radius: 0;
-	border-bottom-left-radius: 0;
-	border-left: none;
-	border-right: var(--tag-border-width) solid var(--tag-border-color);
-	padding-right: var(--tag-padding-x);
-	padding-left: 0;
-}
-.markdown-source-view.is-rtl .cm-line .cm-hashtag.cm-hashtag-end,
-.markdown-source-view .cm-line[dir="rtl"] .cm-hashtag.cm-hashtag-end {
-	border-top-left-radius: var(--tag-radius);
-	border-bottom-left-radius: var(--tag-radius);
-	border-top-right-radius: 0;
-	border-bottom-right-radius: 0;
-	border-right: none;
-	border-left: var(--tag-border-width) solid var(--tag-border-color);
-	padding-left: var(--tag-padding-x);
-	padding-right: 0;
-}
+/* /1* Styling for collapse indicator on the lists *1/ */
+/* .markdown-source-view.is-rtl .cm-line:not(.cm-active):not(.HyperMD-header):not(.HyperMD-task-line) .cm-fold-indicator .collapse-indicator, */
+/* .markdown-source-view .cm-line[dir="rtl"]:not(.cm-active):not(.HyperMD-header):not(.HyperMD-task-line) .cm-fold-indicator .collapse-indicator { */
+/* 	padding-right: 0; */
+/* 	padding-left: 18px; */
+/* 	right: -16px; */
+/* } */
 
-.markdown-preview-view.is-auto .esm-rtl,
-.kanban-plugin__board .esm-rtl,
-.kanban-plugin__drag-container .esm-rtl,
-.markdown-source-view.is-auto .table-cell-wrapper.esm-rtl {
-	direction: rtl;
-	text-align: right;
-}
+/* /1* Styling for tags in RTL *1/ */
+/* .markdown-source-view.is-rtl .cm-line .cm-hashtag.cm-hashtag-begin, */
+/* .markdown-source-view .cm-line[dir="rtl"] .cm-hashtag.cm-hashtag-begin { */
+/* 	border-top-right-radius: var(--tag-radius); */
+/* 	border-bottom-right-radius: var(--tag-radius); */
+/* 	border-top-left-radius: 0; */
+/* 	border-bottom-left-radius: 0; */
+/* 	border-left: none; */
+/* 	border-right: var(--tag-border-width) solid var(--tag-border-color); */
+/* 	padding-right: var(--tag-padding-x); */
+/* 	padding-left: 0; */
+/* } */
+/* .markdown-source-view.is-rtl .cm-line .cm-hashtag.cm-hashtag-end, */
+/* .markdown-source-view .cm-line[dir="rtl"] .cm-hashtag.cm-hashtag-end { */
+/* 	border-top-left-radius: var(--tag-radius); */
+/* 	border-bottom-left-radius: var(--tag-radius); */
+/* 	border-top-right-radius: 0; */
+/* 	border-bottom-right-radius: 0; */
+/* 	border-right: none; */
+/* 	border-left: var(--tag-border-width) solid var(--tag-border-color); */
+/* 	padding-left: var(--tag-padding-x); */
+/* 	padding-right: 0; */
+/* } */
 
-/* Moving bullets to right side of the page and adding enough space between the bullet and the text */
-.markdown-preview-view.is-auto .esm-rtl > .list-bullet,
-.markdown-preview-view.is-rtl .list-bullet {
-	float: right;
-	margin-right: -12px;
-}
+/* .markdown-preview-view.is-auto .esm-rtl, */
+/* .kanban-plugin__board .esm-rtl, */
+/* .kanban-plugin__drag-container .esm-rtl, */
+/* .markdown-source-view.is-auto .table-cell-wrapper.esm-rtl { */
+/* 	direction: rtl; */
+/* 	text-align: right; */
+/* } */
 
-/* Fixing indentation guides in nested lists */
-.markdown-preview-view.is-auto.show-indentation-guide li.esm-rtl > ul::before,
-.markdown-preview-view.is-auto.show-indentation-guide li.esm-rtl > ol::before {
-	left: auto;
-	right: -15px;
-}
+/* /1* Moving bullets to right side of the page and adding enough space between the bullet and the text *1/ */
+/* .markdown-preview-view.is-auto .esm-rtl > .list-bullet, */
+/* .markdown-preview-view.is-rtl .list-bullet { */
+/* 	float: right; */
+/* 	margin-right: -12px; */
+/* } */
 
-/* Moving the collapse indicator to right side of the page */
-.markdown-preview-view.is-auto .esm-rtl > .collapse-indicator,
-.markdown-preview-view.is-rtl .collapse-indicator {
-	float: right;
-}
+/* /1* Fixing indentation guides in nested lists *1/ */
+/* .markdown-preview-view.is-auto.show-indentation-guide li.esm-rtl > ul::before, */
+/* .markdown-preview-view.is-auto.show-indentation-guide li.esm-rtl > ol::before { */
+/* 	left: auto; */
+/* 	right: -15px; */
+/* } */
 
-/* Moving the collapse indicator icon on the right of the text with enough space between */
-.markdown-preview-view.is-auto .esm-rtl > .list-collapse-indicator,
-.markdown-preview-view.is-rtl .list-collapse-indicator {
-	margin-right: -48px;
-	padding-left: 18px;
-}
+/* /1* Moving the collapse indicator to right side of the page *1/ */
+/* .markdown-preview-view.is-auto .esm-rtl > .collapse-indicator, */
+/* .markdown-preview-view.is-rtl .collapse-indicator { */
+/* 	float: right; */
+/* } */
 
-/* Moving the heading collapse indicator on the right of the text. Without
-This the collapse indicator will be over the heading text */
-.markdown-preview-view.is-auto .esm-rtl > .heading-collapse-indicator,
-.markdown-preview-view.is-rtl .heading-collapse-indicator {
-	margin-right: -22px;
-}
+/* /1* Moving the collapse indicator icon on the right of the text with enough space between *1/ */
+/* .markdown-preview-view.is-auto .esm-rtl > .list-collapse-indicator, */
+/* .markdown-preview-view.is-rtl .list-collapse-indicator { */
+/* 	margin-right: -48px; */
+/* 	padding-left: 18px; */
+/* } */
 
-/* Mirroring collapse icon for nested lists so it points to rtl text not outside of page */
-.markdown-preview-view.is-auto .esm-rtl > .collapse-icon .is-collapsed svg.svg-icon,
-.markdown-preview-view.is-auto .esm-rtl.is-collapsed > .collapse-icon svg.svg-icon,
-.markdown-preview-view.is-rtl .collapse-icon .is-collapsed svg.svg-icon {
-	transform: rotate(90deg);
-}
+/* /1* Moving the heading collapse indicator on the right of the text. Without */
+/* This the collapse indicator will be over the heading text *1/ */
+/* .markdown-preview-view.is-auto .esm-rtl > .heading-collapse-indicator, */
+/* .markdown-preview-view.is-rtl .heading-collapse-indicator { */
+/* 	margin-right: -22px; */
+/* } */
 
-/* Mirroring collapse icon for headings so it points to rtl text not outside of page */
-.markdown-preview-view .is-collapsed .esm-rtl > .collapse-icon svg.svg-icon,
-.markdown-preview-view.is-rtl .collapse-icon svg.svg-icon {
-	transform: rotate(90deg);
-}
+/* /1* Mirroring collapse icon for nested lists so it points to rtl text not outside of page *1/ */
+/* .markdown-preview-view.is-auto .esm-rtl > .collapse-icon .is-collapsed svg.svg-icon, */
+/* .markdown-preview-view.is-auto .esm-rtl.is-collapsed > .collapse-icon svg.svg-icon, */
+/* .markdown-preview-view.is-rtl .collapse-icon .is-collapsed svg.svg-icon { */
+/* 	transform: rotate(90deg); */
+/* } */
 
-/* Reverting the margin so the text won't stick to the checkbox */
-.markdown-preview-view.is-auto .esm-rtl > .task-list-item-checkbox,
-.markdown-preview-view.is-rtl .task-list-item-checkbox {
-	margin-left: 6px;
-	margin-right: 0;
-}
+/* /1* Mirroring collapse icon for headings so it points to rtl text not outside of page *1/ */
+/* .markdown-preview-view .is-collapsed .esm-rtl > .collapse-icon svg.svg-icon, */
+/* .markdown-preview-view.is-rtl .collapse-icon svg.svg-icon { */
+/* 	transform: rotate(90deg); */
+/* } */
 
-.markdown-preview-view.is-auto .esm-ltr {
-	direction: ltr;
-	text-align-last: left;
-}
+/* /1* Reverting the margin so the text won't stick to the checkbox *1/ */
+/* .markdown-preview-view.is-auto .esm-rtl > .task-list-item-checkbox, */
+/* .markdown-preview-view.is-rtl .task-list-item-checkbox { */
+/* 	margin-left: 6px; */
+/* 	margin-right: 0; */
+/* } */
 
-/* If the table first header cell is RTL render the table on the right side of page but dont make every cell RTL */
-.is-auto .cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper.esm-rtl), 
-.is-auto .cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper .cm-line[dir="rtl"]) {
-	direction: rtl;
-}
-.is-auto .cm-table-widget .table-cell-wrapper.esm-ltr {
-	direction: ltr;
-}
-.is-auto .cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper.esm-rtl) .table-col-btn {
-	left: -16px;
-	border-left: inherit;
-	cursor: w-resize;
-}
+/* .markdown-preview-view.is-auto .esm-ltr { */
+/* 	direction: ltr; */
+/* 	text-align-last: left; */
+/* } */
 
-/* Similarly to the above, decide on the table direction for Reading View based on the first header cell */
-.markdown-preview-view.is-auto div:has(table thead tr:first-of-type th:first-of-type.esm-rtl) {
-	direction: rtl;
-}
-.markdown-preview-view.is-auto div:has(table thead tr:first-of-type th:first-of-type.esm-ltr) {
-	direction: ltr;
-}
+/* /1* If the table first header cell is RTL render the table on the right side of page but dont make every cell RTL *1/ */
+/* .is-auto .cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper.esm-rtl), */ 
+/* .is-auto .cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper .cm-line[dir="rtl"]) { */
+/* 	direction: rtl; */
+/* } */
+/* .is-auto .cm-table-widget .table-cell-wrapper.esm-ltr { */
+/* 	direction: ltr; */
+/* } */
+/* .is-auto .cm-table-widget:has(thead tr:first-of-type th:first-of-type .table-cell-wrapper.esm-rtl) .table-col-btn { */
+/* 	left: -16px; */
+/* 	border-left: inherit; */
+/* 	cursor: w-resize; */
+/* } */
+
+/* /1* Similarly to the above, decide on the table direction for Reading View based on the first header cell *1/ */
+/* .markdown-preview-view.is-auto div:has(table thead tr:first-of-type th:first-of-type.esm-rtl) { */
+/* 	direction: rtl; */
+/* } */
+/* .markdown-preview-view.is-auto div:has(table thead tr:first-of-type th:first-of-type.esm-ltr) { */
+/* 	direction: ltr; */
+/* } */
 
 /* Helper styles for debugging */
 /* .cm-line[dir="rtl"] { */

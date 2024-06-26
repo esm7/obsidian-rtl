@@ -2,17 +2,14 @@
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/esm7)
 
-This plugin adds configurable RTL support for [Obsidian](https://obsidian.md).
+This plugin extends the built-in RTL support of [Obsidian](https://obsidian.md) by adding some extra features.
 
-It relies on the RTL support of [CodeMirror](https://codemirror.net/doc/manual.html), which is the editor component that Obsidian uses, and contains lots of custom code on top of it to provide a smooth experience within Obsidian.
-You can set a global direction per file (LTR/RTL) or use Auto which decides on each line individually based on the first strongly-directional character.
+Starting version 1.6.x Obsidian offers pretty good RTL support, and this plugin adds the following features to it:
 
-This is the real deal: Arabic, Hebrew, Persian (Farsi), Syriac and Thaana can be combined with LTR languages freely and render just as you'd expect.
-
-To my best knowledge, this is the most comprehensive RTL support any Markdown editor currently has to offer.
-Many editors offer RTL support as a global setting rather than a per-document setting -- while this plugin supports both a per-document global LTR/RTL setting and an Auto mode that can mix many directions in the same note.
-
-**Important note:** as Obsidian is adding native auto direction support in version 1.6.0, the next versions of Obsidian RTL will remove a lot of plugin code and focus on improving some edges in Obsidian's native functionality. Therefore, from this point onward we will not work here on fixes and improvements that will soon be handled natively by Obsidian.
+- Ability to set individual notes to LTR or RTL rather than the built-in auto direction per line.
+- Ability to remember this setting per note.
+- Ability to get this setting via the note's front matter.
+- Ability to set the default to LTR/RTL and change individual notes to Auto.
 
 ## Usage
 
@@ -37,33 +34,23 @@ The plugin provides full direction support in the Canvas core plugin, with the f
 
 If you want to support the development of this plugin, please consider to [buy me a coffee](https://www.buymeacoffee.com/esm7).
 
-## A Note on Auto Text Direction
-
-Version 1.0.0 of this plugin introduced an "auto" mode that detects the direction of each line individually and enables mixed LTR/RTL in the same note.
-This mechanism is based on the "per line text direction" support for CodeMirror that was added a few months earlier, but it tweaks it extensively in order to reach the best user experience that we could (and thanks @zoli for being the first to figure out how to utilize this in an editor plugin!)
-
-For tables, the direction of the table in Auto mode is decided based on the first cell of the table (left-most cell of the header for an LTR table or the right-most one for an RTL table). In addition to that, each cell has its own direction that is decided based on its content.
-
 ## Settings
 
 ### Default text direction
 
 This is the direction to use for files on which you have not set an explicit text direction.
 
-Note that Obsidian 0.13.10 introduced basic RTL support.
-For strict RTL mode this plugin uses the same basic mechanism as that new support, but it adds a few tweaks and overrides the setting by file.
-
-To make the user experience consistent, the plugin synchronizes the RTL setting from Obsidian's Editor pane to be the same as the "default text direction" setting.
+'Auto' is Obsidian's default behavior, which decides on a per-line text direction according to its content.
 
 ### Remember Text Direction Per File
 
 When enabled (which is the default), when you change the text direction of a file it will be saved.
-Every time you open that file it will use the same text direction regardless of the default.
+Every time you open that note it will use the same text direction regardless of the default.
 This is useful, for example, if most of your notes are in English (so you want to keep the default LTR) but you have some notes in Arabic/Hebrew/Persian (Farsi) and you'd like to always edit them in RTL.
 
 If you disable this setting, all notes will load in the default text direction.
 
-If you want to forget the text direction of a file and go back to using the default, remove it from the map in `VAULT_DIR/.obsidian/rtl.json`.
+If you want to forget the text direction of a file and go back to using the default, remove it from the map in `VAULT_DIR/.obsidian/plugins/obsidian-rtl/data.json`.
 
 ### Front Matter Direction
 
@@ -80,6 +67,14 @@ It is possible to temporarily override a note's direction regardless of the fron
 
 
 ## Changelog
+
+### 2.0.0
+
+An overhaul of the plugin to build on top of Obsidian's new (1.6.x) RTL support, not interfere with it, and only add a few features on top.
+
+Known issues:
+- Export to PDF of a note set to LTR/RTL leaves the note looking wrong in some cases.
+- The properties section of RTL notes are right-aligned too, which is probably not what we want.
 
 ### 1.2.2
 

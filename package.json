@@ -1,13 +1,12 @@
 {
   "name": "obsidian-rtl",
-  "version": "1.2.2",
-  "description": "RTL (Right to Left) language support for Obsidian.",
+  "version": "2.0.0",
+  "description": "Extended RTL (Right to Left) language support for Obsidian.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-    "version": "node version-bump.mjs && git add manifest.json versions.json",
-    "test": "jest"
+    "version": "node version-bump.mjs && git add manifest.json versions.json"
   },
   "keywords": [],
   "author": "",

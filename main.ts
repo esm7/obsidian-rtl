@@ -1,15 +1,16 @@
 import { MarkdownFileInfo, Notice, WorkspaceLeaf, MarkdownView, Plugin, TFile, TAbstractFile, getIcon, Editor } from 'obsidian';
-import { getAutoDirectionPlugin, AutoDirectionPlugin } from './AutoDirPlugin';
-import { autoDirectionPostProcessor } from './AutoDirPostProcessor';
+import { getEditorPlugin, EditorPlugin } from './EditorPlugin';
+import { autoDirectionPostProcessor } from './MarkdownPostProcessor';
 import { EditorView, ViewPlugin } from '@codemirror/view';
-import { Direction, RTL_CLASS, AUTO_CLASS } from 'direction.util';
+import { Prec } from "@codemirror/state";
+import { Direction, LTR_CLASS, RTL_CLASS, AUTO_CLASS } from 'direction.util';
 import { Settings, DEFAULT_SETTINGS, RtlSettingsTab } from 'settingsTab';
 
 export default class RtlPlugin extends Plugin {
 	public settings: Settings = null;
 	private statusBarItem: HTMLElement = null;
 	private statusBarText: HTMLElement = null;
-	private autoDirectionPlugin: ViewPlugin<AutoDirectionPlugin>;
+	private editorPlugin: ViewPlugin<EditorPlugin>;
 
 	async onload() {
 		this.addCommand({
@@ -24,30 +25,31 @@ export default class RtlPlugin extends Plugin {
 			}
 		});
 
-		this.autoDirectionPlugin = getAutoDirectionPlugin(this);
-		this.registerEditorExtension(this.autoDirectionPlugin);
-		this.registerEditorExtension(EditorView.perLineTextDirection.of(true));
+		await this.convertLegacySettings();
+		await this.loadSettings();
+
+		this.editorPlugin = getEditorPlugin(this);
+		// It's important to use Prec.lowest here, so our editor extension is called after Obsidian's CodeMirror
+		// extensions and can override the direction that they set.
+		this.registerEditorExtension(Prec.lowest(this.editorPlugin));
 		this.registerMarkdownPostProcessor((el, ctx) => {
 			autoDirectionPostProcessor(el, ctx, (path, markdownPreviewElement) => this.setPreviewDirectionByFileSettings(path, markdownPreviewElement));
 		});
 
-		await this.convertLegacySettings();
-		await this.loadSettings();
-
 		this.addSettingTab(new RtlSettingsTab(this.app, this));
 
 		this.app.workspace.on('active-leaf-change', async (leaf: WorkspaceLeaf) => {
-			// This creates a redundancy with the flow coming from AutoDirPlugin, but it seems to be needed
+			// This creates a redundancy with the flow coming from EditorPlugin, but it seems to be needed
 			// for older versions of Obsidian
-			this.adjustDirectionToActiveView();
-			this.updateStatusBar();
+			// this.adjustDirectionToActiveView();
+			// this.updateStatusBar();
 		});
 
 		this.app.workspace.on('file-open', async (file: TFile, ctx?: any) => {
-			// This creates a redundancy with the flow coming from AutoDirPlugin, but it seems to be needed
+			// This creates a redundancy with the flow coming from EditorPlugin, but it seems to be needed
 			// for older versions of Obsidian
-			this.adjustDirectionToActiveView();
-			this.updateStatusBar();
+			// this.adjustDirectionToActiveView();
+			// this.updateStatusBar();
 		});
 
 		this.registerEvent(this.app.vault.on('delete', (file: TAbstractFile) => {
@@ -85,7 +87,7 @@ export default class RtlPlugin extends Plugin {
 		if (view && view?.editor) {
 			// @ts-expect-error, not typed
 			const editorView = view.editor.cm as EditorView;
-			this.adjustAutoDirection(editorView, 'ltr');
+			this.adjustEditorPlugin(editorView, 'auto');
 		}
 
 		console.log('unloading RTL plugin');
@@ -99,17 +101,16 @@ export default class RtlPlugin extends Plugin {
 	}
 
 	// Adjust the direction of a given MarkdownView (editor, Reading view, title etc), optionally
-	// using the given autoDirectionPlugin in the case this is called from within in
-	adjustDirectionToView(view: MarkdownView, autoDirectionPlugin?: AutoDirectionPlugin) {
+	// using the given editorPlugin in the case this is called from within it.
+	adjustDirectionToView(view: MarkdownView, editorPlugin?: EditorPlugin) {
 		if (!view)
 			return;
-		this.syncDefaultDirection();
 		const file = view?.file;
 		const editor = view?.editor;
 		const editorView = (editor as any)?.cm as EditorView;
 		if (file && file.path && editorView) {
 			const [requiredDirection, _usedDefault] = this.getRequiredFileDirection(file);
-			this.setMarkdownViewDirection(view, editor, editorView, requiredDirection, autoDirectionPlugin);
+			this.setMarkdownViewDirection(view, editor, editorView, requiredDirection, editorPlugin);
 		}
 	}
 
@@ -205,14 +206,14 @@ export default class RtlPlugin extends Plugin {
 
 	// Set the direction of an editor that's embedded in an iframe, e.g. an editor in a canvas card.
 	// We update here only the editor direction and not Reading view, which is handled from a different path,
-	// because there currently doesn't seem to be a reliable way to get from the AutoDirectionPlugin to
+	// because there currently doesn't seem to be a reliable way to get from the EditorPlugin to
 	// the markdown-preview-view container.
-	handleIframeEditor(editorDiv: HTMLElement, editorView: EditorView, file: TFile, autoDirectionPlugin: AutoDirectionPlugin) {
+	handleIframeEditor(editorDiv: HTMLElement, editorView: EditorView, file: TFile, editorPlugin: EditorPlugin) {
 		const isInIframe = editorDiv.closest('.mod-inside-iframe');
 		if (isInIframe) {
 			if (editorDiv instanceof HTMLDivElement) {
 				const [requiredDirection, _] = this.getRequiredFileDirection(file);
-				this.adjustAutoDirection(editorView, requiredDirection, autoDirectionPlugin);
+				this.adjustEditorPlugin(editorView, requiredDirection, editorPlugin);
 				this.setDocumentDirectionForEditorDiv(editorDiv, requiredDirection);
 			}
 		}
@@ -221,7 +222,7 @@ export default class RtlPlugin extends Plugin {
 	// This is the main entry point for setting a Markdown view (the "regular" view of Obsidian), which can be either
 	// an editor, or a Reading View, to an LTR/RTL/Auto direction.
 	// It sets the editor, the Markdown Preview (reading/printing), the note title etc.
-	setMarkdownViewDirection(view: MarkdownView, editor: Editor, editorView: EditorView, newDirection: Direction, autoDirectionPlugin?: AutoDirectionPlugin) {
+	setMarkdownViewDirection(view: MarkdownView, editor: Editor, editorView: EditorView, newDirection: Direction, editorPlugin?: EditorPlugin) {
 		if (!view || !editor) {
 			this.hideStatusBar();
 			return;
@@ -234,10 +235,11 @@ export default class RtlPlugin extends Plugin {
 		}
 		title?.setAttribute('dir', newDirection === 'auto' ? 'auto' : '');
 
-		// Adjust the editor for Auto Direction using the AutoDirPlugin (either a given one or we find it from the editor)
-		this.adjustAutoDirection(editorView, newDirection, autoDirectionPlugin);
+		// Adjust the editor for the new direction using the EditorPlugin (either a given one or we find it from the editor)
+		this.adjustEditorPlugin(editorView, newDirection, editorPlugin);
 
-		// Adjust the editor for LTR/RTL
+		// Adjust the editor for LTR/RTL, bypassing Obsidian's default behavior (auto direction) if needed.
+		//
 		const editorDivs = view.contentEl.getElementsByClassName('cm-editor');
 		for (const editorDiv of editorDivs) {
 			if (editorDiv instanceof HTMLDivElement)
@@ -260,43 +262,40 @@ export default class RtlPlugin extends Plugin {
 		}
 
 		editor.refresh();
-
-		// Set the *currently active* export direction. This is global and changes every time the user
-		// switches a pane
-		if (newDirection !== 'auto') {
-			this.setExportDirection(newDirection);
-		}
 	}
 
 	// Adjust the given EditorView for Auto direction.
 	// This both sets Auto direction when needed and turns it off if the direction was changed to LTR/RTL (and
 	// then the constant LTR/RTL is handled in setDocumentDirectionForEditorDiv).
 	// There's a gentle point here: we get here both from applying a change from a command (switch a document direction)
-	// and also from the constructor of AutoDirPlugin when a new editor is created. In the latter case we must
+	// and also from the constructor of EditorPlugin when a new editor is created. In the latter case we must
 	// use the instance we were given and *not dispatch* an update, which cannot be done from inside the constructor
 	// of the editor plugin.
-	adjustAutoDirection(editorView: EditorView, newDirection: Direction, autoDirectionPlugin?: AutoDirectionPlugin) {
-		const autoDirection = autoDirectionPlugin ?? editorView.plugin(this.autoDirectionPlugin);
-		if (autoDirection) {
-			autoDirection.setActive(newDirection === 'auto', editorView);
-			// If we're not inside the context of a specific AutoDirectionPlugin, we need to dispatch an update
+	adjustEditorPlugin(editorView: EditorView, newDirection: Direction, editorPlugin?: EditorPlugin) {
+		let dispatchUpdate = false;
+		if (!editorPlugin) {
+			editorPlugin = editorView.plugin(this.editorPlugin);
+			dispatchUpdate = true;
+		}
+		if (editorPlugin) {
+			editorPlugin.setDirection(newDirection, editorView);
+			// If we're not inside the context of a specific EditorPlugin, we need to dispatch an update
 			// so the editor is refreshed
-			if (!autoDirectionPlugin)
+			if (dispatchUpdate)
 				editorView.dispatch();
 		}
 	}
 
-	// Set a constant LTR/RTL direction for an editor or mark it as Auto using a class.
-	// editorDiv is the element with the cm-editor class
+	// Set a constant LTR/RTL direction for an editor if required, bypassing Obsidian's default auto direction.
+	// This is done both using a direction style for the editor div and by adding an is-ltr/is-rtl class to the
+	// editor div, which is used by some extra CSS rules for various adjustments.
+	// editorDiv is the element with the cm-editor class.
 	setDocumentDirectionForEditorDiv(editorDiv: HTMLDivElement, newDirection: Direction) {
 		editorDiv.style.direction = newDirection === 'auto' ? '' : newDirection;
 		this.addDirectionClassToEl(editorDiv.parentElement, newDirection);
 	}
 
 	setDocumentDirectionForReadingDiv(readingDiv: HTMLDivElement, newDirection: Direction) {
-		// In case of an LTR/RTL direction, we ue the 'direction' style.
-		// For an Auto direction the AutoDirPostProcessor takes over and we just need to add a few classes
-		// to set settings (e.g. 'rtl-yaml').
 		readingDiv.style.direction = newDirection === 'auto' ? '' : newDirection;
 		// Although Obsidian doesn't care about is-rtl in Markdown preview, we use it below for some more formatting
 		this.addDirectionClassToEl(readingDiv, newDirection);
@@ -317,50 +316,21 @@ export default class RtlPlugin extends Plugin {
 
 	addDirectionClassToEl(el: HTMLElement|HTMLDivElement, direction: Direction) {
 		switch (direction) {
+			case 'ltr':
+				el.classList.remove(RTL_CLASS);
+				el.classList.remove(AUTO_CLASS);
+				el.classList.add(LTR_CLASS);
+				break;
 			case 'rtl':
+				el.classList.remove(LTR_CLASS);
 				el.classList.remove(AUTO_CLASS);
 				el.classList.add(RTL_CLASS);
 				break;
-			case 'auto':
+			default:
+				el.classList.remove(LTR_CLASS);
 				el.classList.remove(RTL_CLASS);
 				el.classList.add(AUTO_CLASS);
-				break;
-			default:
-				el.classList.remove(RTL_CLASS);
-				el.classList.remove(AUTO_CLASS);
 		}
-	}
-
-	setExportDirection(newDirection: Direction) {
-		this.replacePageStyleByString('searched and replaced',
-			`/* This is searched and replaced by the plugin */ @media print { body { direction: ${newDirection}; } }`,
-			true);
-	}
-
-	// Returns true if a replacement was made
-	replacePageStyleByString(searchString: string, newStyle: string, addIfNotFound: boolean) {
-		let alreadyExists = false;
-		let style = this.findPageStyle(searchString);
-		if (style) {
-			if (style.getText() === searchString)
-				alreadyExists = true;
-			else
-				style.setText(newStyle);
-		} else if (addIfNotFound) {
-			let style = document.createElement('style');
-			style.textContent = newStyle;
-			document.head.appendChild(style);
-		}
-		return style && !alreadyExists;
-	}
-
-	findPageStyle(regex: string) {
-		let styles = document.head.getElementsByTagName('style');
-		for (let style of styles) {
-			if (style.getText().match(regex))
-				return style;
-		}
-		return null;
 	}
 
 	// This is used for the UI command that switches the active document's direction and cycles
@@ -403,13 +373,6 @@ export default class RtlPlugin extends Plugin {
 					new Notice('To change a canvas card direction, open the document separately and reload the canvas.');
 				else
 					new Notice("Can't change the direction of a card without a file.");
-				// Work in progress
-				// const editorDiv = (editor as any)?.containerEl;
-				// if (editorDiv === null)
-				// 	return;
-				// const editorView = (editor as any).cm as EditorView;
-				// this.adjustAutoDirection(editorView, newDirection);
-				// this.setDocumentDirectionForEditorDiv(editorDiv, newDirection);
 			}
 		}
 	}
@@ -454,16 +417,6 @@ export default class RtlPlugin extends Plugin {
 				return direction;
 			}
 			catch (error) {}
-		}
-	}
-
-	syncDefaultDirection() {
-		// Sync the plugin default direction with Obsidian's own setting
-		const obsidianDirection = (this.app.vault as any).getConfig('rightToLeft') ? 'rtl' : 'ltr';
-		if (obsidianDirection != this.settings.defaultDirection &&
-			this.settings.defaultDirection !== 'auto') {
-			this.settings.defaultDirection = obsidianDirection;
-			this.saveSettings();
 		}
 	}
 }

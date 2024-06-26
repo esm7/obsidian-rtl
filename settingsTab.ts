@@ -37,8 +37,6 @@ export class RtlSettingsTab extends PluginSettingTab {
 
 		containerEl.createEl('h2', {text: 'RTL Settings'});
 
-		this.plugin.syncDefaultDirection();
-
 		new Setting(containerEl)
 			.setName('Remember text direction per file')
 			.setDesc('Store and remember the text direction used for each file individually.')
