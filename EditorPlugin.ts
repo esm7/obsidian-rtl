@@ -64,7 +64,20 @@ export function getEditorPlugin(rtlPlugin: RtlPlugin) {
 				// Checking for editorInfo.editMode because apparently editorInfo.editor which is needed later
 				// is a getter which counts on this field to exist
 				if (editorInfo && editorInfo instanceof MarkdownView && (editorInfo as any).editMode) {
-					this.rtlPlugin.adjustDirectionToView(editorInfo, this);
+					// Checking that view is the same as the main document view
+					if ((editorInfo as any).editMode.cm === view) {
+						this.rtlPlugin.adjustDirectionToView(editorInfo, this);
+					}
+					// May be a nested EditorView found in the main view, such as an EditorView of the table cell
+					else {
+						// Retrieving current document direction
+						const file = editorInfo?.file;
+						if (file && file.path) {
+							[this.direction] = this.rtlPlugin.getRequiredFileDirection(file);
+						}
+						// Adjust the direction of the nested view
+						this.setDirection(this.direction, this.view);
+					}
 				}
 				this.rtlPlugin.handleIframeEditor(this.view.dom, this.view, editorInfo.file, this);
 			}

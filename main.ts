@@ -308,6 +308,17 @@ export default class RtlPlugin extends Plugin {
 			if (dispatchUpdate)
 				editorView.dispatch();
 		}
+
+		let editor = this.app.workspace.activeEditor?.editor;
+		let activeEditorView = (editor as any)?.activeCM as EditorView;
+		// Check if there any active table cell's EditorView
+		if (activeEditorView && (editor as any).inTableCell as boolean) {
+			// Retrieve EditorPlugin from the table cell view
+			let tableCellEditorPlugin = activeEditorView.plugin(this.editorPlugin);
+			tableCellEditorPlugin.setDirection(newDirection, activeEditorView);
+			// Update the table cell direction
+			activeEditorView.dispatch();
+		}
 	}
 
 	// Set a constant LTR/RTL direction for an editor if required, bypassing Obsidian's default auto direction.
