@@ -68,6 +68,11 @@
 	unicode-bidi: unset;
 }
 
+/* Use to force frontmatter to be LTR-directioned when "Prevent Frontmatter to be RTL-directioned" was enabled. */
+.cm-content>.cm-line:has(>.cm-hmd-frontmatter):not([dir]) {
+	direction: ltr;
+}
+
 /* /1* RTL and Auto callout titles that are detected as RTL - set to the right *1/ */
 /* .is-rtl .callout-title:has(.esm-rtl), */
 /* .is-auto .callout-title:has(.esm-rtl) { */
