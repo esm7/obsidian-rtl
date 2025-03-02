@@ -80,6 +80,30 @@ export default class RtlPlugin extends Plugin {
 				return;
 			this.switchDocumentDirection(view.editor, view);
 		});
+
+		// Because the indicator button won't show properly the direction text when startup
+		// or when changing between file, we need to register "file-open" view and
+		// set the callback to update the direction text.
+		this.registerEvent(this.app.workspace.on("active-leaf-change", leaf => {
+			let view = leaf.view;
+			if (view instanceof MarkdownView && view.file) {
+				let [direction, usedDefault] = this.getRequiredFileDirection(view.file),
+					directionStr = direction == "auto"
+						? direction
+						: direction.toUpperCase();
+				if (usedDefault) {
+					directionStr = `Default (${directionStr})`;
+				} else if (directionStr == "auto") {
+					directionStr = "Auto";
+				}
+				this.statusBarText.textContent = directionStr;
+				this.statusBarItem.style.display = null;
+			}
+			
+			else {
+				this.hideStatusBar();
+			}
+		}));
 	}
 
 	onunload() {
