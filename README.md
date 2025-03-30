@@ -68,6 +68,13 @@ It is possible to temporarily override a note's direction regardless of the fron
 
 ## Changelog
 
+### 2.0.1
+
+- Fixed https://github.com/esm7/obsidian-rtl/issues/85.
+- Added an option to prevent raw YAML from being RTL.
+
+Thanks @kotaindah55!
+
 ### 2.0.0
 
 An overhaul of the plugin to build on top of Obsidian's new (1.6.x) RTL support, not interfere with it, and only add a few features on top.
