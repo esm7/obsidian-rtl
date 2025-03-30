@@ -38,13 +38,6 @@ export default class RtlPlugin extends Plugin {
 
 		this.addSettingTab(new RtlSettingsTab(this.app, this));
 
-		this.app.workspace.on('active-leaf-change', async (leaf: WorkspaceLeaf) => {
-			// This creates a redundancy with the flow coming from EditorPlugin, but it seems to be needed
-			// for older versions of Obsidian
-			// this.adjustDirectionToActiveView();
-			// this.updateStatusBar();
-		});
-
 		this.app.workspace.on('file-open', async (file: TFile, ctx?: any) => {
 			// This creates a redundancy with the flow coming from EditorPlugin, but it seems to be needed
 			// for older versions of Obsidian
@@ -87,21 +80,7 @@ export default class RtlPlugin extends Plugin {
 		this.registerEvent(this.app.workspace.on("active-leaf-change", leaf => {
 			let view = leaf.view;
 			if (view instanceof MarkdownView && view.file) {
-				let [direction, usedDefault] = this.getRequiredFileDirection(view.file),
-					directionStr = direction == "auto"
-						? direction
-						: direction.toUpperCase();
-				if (usedDefault) {
-					directionStr = `Default (${directionStr})`;
-				} else if (directionStr == "auto") {
-					directionStr = "Auto";
-				}
-				this.statusBarText.textContent = directionStr;
-				this.statusBarItem.style.display = null;
-			}
-			
-			else {
-				this.hideStatusBar();
+				this.updateStatusBar(view);
 			}
 		}));
 	}
@@ -193,11 +172,11 @@ export default class RtlPlugin extends Plugin {
 		}
 	}
 
-	// Update the direction status bar item according to the active view
-	updateStatusBar() {
+	// Update the direction status bar item according to the given view or the active view
+	updateStatusBar(view?: MarkdownView) {
 		let hide = true;
 		let usedDefault = false;
-		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (!view) view = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (view && view?.editor) {
 			const direction = this.getDocumentDirection(view.editor, view);
 			// If the file is using the settings default direction (i.e. there is no special setting for that
