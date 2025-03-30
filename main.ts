@@ -38,13 +38,6 @@ export default class RtlPlugin extends Plugin {
 
 		this.addSettingTab(new RtlSettingsTab(this.app, this));
 
-		this.app.workspace.on('active-leaf-change', async (leaf: WorkspaceLeaf) => {
-			// This creates a redundancy with the flow coming from EditorPlugin, but it seems to be needed
-			// for older versions of Obsidian
-			// this.adjustDirectionToActiveView();
-			// this.updateStatusBar();
-		});
-
 		this.app.workspace.on('file-open', async (file: TFile, ctx?: any) => {
 			// This creates a redundancy with the flow coming from EditorPlugin, but it seems to be needed
 			// for older versions of Obsidian
@@ -80,6 +73,16 @@ export default class RtlPlugin extends Plugin {
 				return;
 			this.switchDocumentDirection(view.editor, view);
 		});
+
+		// Because the indicator button won't show properly the direction text when startup
+		// or when changing between file, we need to register "file-open" view and
+		// set the callback to update the direction text.
+		this.registerEvent(this.app.workspace.on("active-leaf-change", leaf => {
+			let view = leaf.view;
+			if (view instanceof MarkdownView && view.file) {
+				this.updateStatusBar(view);
+			}
+		}));
 	}
 
 	onunload() {
@@ -169,11 +172,11 @@ export default class RtlPlugin extends Plugin {
 		}
 	}
 
-	// Update the direction status bar item according to the active view
-	updateStatusBar() {
+	// Update the direction status bar item according to the given view or the active view
+	updateStatusBar(view?: MarkdownView) {
 		let hide = true;
 		let usedDefault = false;
-		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (!view) view = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (view && view?.editor) {
 			const direction = this.getDocumentDirection(view.editor, view);
 			// If the file is using the settings default direction (i.e. there is no special setting for that
@@ -283,6 +286,17 @@ export default class RtlPlugin extends Plugin {
 			// so the editor is refreshed
 			if (dispatchUpdate)
 				editorView.dispatch();
+		}
+
+		let editor = this.app.workspace.activeEditor?.editor;
+		let activeEditorView = (editor as any)?.activeCM as EditorView;
+		// Check if there any active table cell's EditorView
+		if (activeEditorView && (editor as any).inTableCell as boolean) {
+			// Retrieve EditorPlugin from the table cell view
+			let tableCellEditorPlugin = activeEditorView.plugin(this.editorPlugin);
+			tableCellEditorPlugin.setDirection(newDirection, activeEditorView);
+			// Update the table cell direction
+			activeEditorView.dispatch();
 		}
 	}
 

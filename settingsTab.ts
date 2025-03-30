@@ -8,6 +8,7 @@ export type Settings = {
 	rememberPerFile: boolean;
 	setNoteTitleDirection: boolean;
 	setYamlDirection: boolean;
+	preventRTLFrontmatter: boolean; // Frontmatter == Raw YAML
 	statusBar: boolean;
 };
 
@@ -17,6 +18,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	rememberPerFile: true,
 	setNoteTitleDirection: true,
 	setYamlDirection: false,
+	preventRTLFrontmatter: false,
 	statusBar: true
 };
 
@@ -81,6 +83,16 @@ export class RtlSettingsTab extends PluginSettingTab {
 							 this.plugin.saveSettings();
 							 this.plugin.adjustDirectionToActiveView();
 						 }));
+
+		new Setting(containerEl)
+			.setName('Prevent raw YAML (Frontmatter) to be RTL-directioned in Editor')
+			.setDesc('Raw YAML will always be LTR-directioned whatever the direction is. (Restart required after changing.)')
+			.addToggle(toggle => toggle.setValue(this.settings.preventRTLFrontmatter ?? false)
+						.onChange((value) => {
+							this.settings.preventRTLFrontmatter = value;
+							this.plugin.saveSettings();
+							this.plugin.adjustDirectionToActiveView();
+						}));
 
 		new Setting(containerEl)
 			.setName('Show status bar item')
