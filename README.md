@@ -62,8 +62,14 @@ direction: rtl
 ---
 ```
 
-The front matter direction overrides any other setting.
-It is possible to temporarily override a note's direction regardless of the front matter (e.g. to edit or view it differently), but the next time the note is loaded, the front matter direction will always be used.
+Valid vaules for `direction` are:
+
+- `rtl` (right-to-left)
+- `ltr` (left-to-right)
+- `auto` (let Obsidian decide per-line)
+
+The front matter direction **overrides all other settings (including per-file remembered directions).
+While you can temporarily override a note's direction in the UI, the front matter value will always be restored when the note is reloaded.
 
 
 ## Changelog
